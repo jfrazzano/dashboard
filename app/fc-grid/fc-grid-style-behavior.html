@@ -1,0 +1,629 @@
+<script>
+(function(){
+"use strict";
+
+})();
+window.FCBehaviors = window.FCBehaviors || {};
+FCBehaviors.FcGridStyleBehaviorImpl = {
+	listeners: {"color-picker-selected":"getcolor"},
+	properties: {
+		gridEvent:{
+        type: Object,
+        value: function(){return {};},
+        observer: "observeGridEvent",
+        notify: true
+      },
+    btnText:{
+      type: String,
+      value:function(){return "";},
+      notify: true
+    },
+     defaultFormat:{
+        type:Object,
+        value:function(){
+            return {"color": "#009", "background": "#fefefe", "header_backgroundColor":"aliceblue", "fontSize": "18px", "fontWeight": "600", "fontFamily": "merriweather", "lineHeight": "1.15", "border": "1px #afafaf solid", "styleText": "margin:0px; box-shadow: 1px 3px 4px 2px #fafafa; cursor: cell;font-size: 18px; font-weight: 600; color: #009; font-family: merriweather; text-align: center; white-space: wrap; max-height: 45px; min-height: 45px; border: 1px solid #afafaf; padding-top: 4px; font-family: merriweather; text-align: center; font-size: 18px; resize:none;"};
+          },
+        notify: true 
+    },
+    defaultHeader:{
+    	type:Object,
+    	value:function(){
+    		return {"max-height": "65px;","border": "solid 1px #009;", "min-height": "18px;", "margin": "0px;", "height":"23px!important;", "font-family":"merriweather;", "background": "aliceblue;", "color": " #009;", "text-align": "center;", "font-size": "18px;","font-weight":"700;", "resize":"none;", "styleText":"max-height: 65px; border: solid 1px #009; min-height: 18px;  margin: 0px;  height:23px!important;  font-family:merriweather;  background: aliceblue;  color:  #009;  text-align: center;  font-size: 18px; font-weight:700; resize:none;"};
+    	},
+    	notify: true,
+    },
+    allSymbols:{
+    	type:String,
+    	value:function(){return  `➔ ❶ ✂ ✎ ✒ ✜ ❚ ❶ ➀ ➞ ☚ ☛ ☰ ☱ ☷ ☑ ☐ ☎ ☏ ► ▼ ▲ ◄ ⇒ Δ ▐ █ ▄ ▀`;},
+    	notify: true,
+    },
+    color:{
+        type: String,
+        value:function(){return "#009";},
+        notify: true
+        },
+    background:{
+        type: String,
+        value:function(){return "#F0F8FF";},
+        notify: true
+    
+    },
+     columnArchive:{
+      type: Array,
+      value: function(){return [];},
+      notify: true
+    },
+    gridEventArchive:{
+      type:Array,
+      value:function(){return [];},
+      notify: true
+    },
+    returnDataObject:{
+      type: Object,
+      notify: true,
+      value:function(){return {};},
+    },
+    archivist:{
+    	type:Object,
+    	value:function(){return [];},
+    	notify: true
+    	},
+    
+	},
+	  ready(){
+
+
+    //console.log(this.mapsArray);
+
+    },
+    detached(){},
+    setDataArgs(menuArray){
+      var newMenuArray=menuArray.map(function(val, index, array){
+             var newButtons=val.buttons.map(function(button,i, ar){
+                    button.dataArgs={"setValue": button.dataSetValue, "property": button.dataProperty, "propertyAndValue": button.dataProperty+" " +button.dataSetValue};
+                  return button;});
+              //console.log(val.buttons);
+             val.buttons=newButtons;
+             ////console.log(newButtons,val.buttons);
+             return val;
+           });
+             return newMenuArray;
+      }, 
+    get columnMenu(){
+      var menuArray= [
+          { "title": "Adding & Deleting Columns", 
+              "buttons":[
+              {"text": ["+1 Column Right: ","", " ✜ ▐ ☛"],"myFunction": this.addColumn.bind(this)}, 
+              {"text":["+1 Column Left: ",""," ✜ ▐ ☚"], "myFunction": this.addColumn.bind(this)},
+              {"text":["Delete Column: ","", " ✂ ▐"], "myFunction": this.deleteThisColumn.bind(this)}, 
+             {"text": ["Restore Column: ", , "☤ ▐ ☤"], "myFunction":this.restoreThisColumn.bind(this)}
+            ]
+          }, 
+       
+         {   "title":"Column Highlighting Patterns",
+            "boundFunctionString":this.alternatingHighlighter.toString(),
+            "function":this.alternatingHighlighter.bind(this), 
+              "buttons": [
+                  {"text":["Add Odd Numbered Column Highlighter", "",""],
+                      "dataProperty": "background:",
+                      "dataSetValue":this.background,
+                      "myFunction":this.alternatingHighlighter.bind(this), 
+            
+                  },
+                  {   "text":["Remove Odd Numbered Columns' Highlight", "",""],
+                      "dataProperty":"background:",
+                      "dataSetValue":`${this.defaultFormat.background};`,
+                      "myFunction": this.alternatingHighlighter.bind(this)
+                    },
+                  { "text":["Add Even Numbered Column Highlighting", "",""],
+                      "dataProperty": "background:",
+                      "dataSetValue ": this.background+"; ",
+                      "myFunction":this.alternatingHighlighter.bind(this)
+                    },
+                    {   "text":["Remove Even Numbered Columns' Highlight", "",""],
+                      "dataProperty":"background:",
+                      "dataSetValue":`${this.defaultFormat.background};`,
+                      "myFunction": this.alternatingHighlighter.bind(this)
+                    },
+                  { "text":["Shift Column Highlight Left One Column", "",""],
+                      "dataProperty": "background:",
+                      "dataSetValue ": this.background+"; ",
+                      "myFunction":this.alternatingHighlighter.bind(this)
+                    },
+                     { "text":["Shift Column Highlight Right One Column", "",""],
+                      "dataProperty": "background:",
+                      "dataSetValue ": this.background +";",
+                      "myFunction":this.alternatingHighlighter.bind(this)
+                    },
+                  { "text":["Begin and End Column Highlight On Tap", "",""],
+                      "dataProperty":"background:",
+                      "dataSetValue ": this.background + ";",
+                      "myFunction":this.alternatingHighlighter.bind(this),
+                     // "additionalRequirements": get dragWrapperSelectionHandler(),
+                    },
+                  ]
+              },  
+           ];
+
+         var returnArray=this.setDataArgs(menuArray);
+         return returnArray;
+      
+      },
+    get rowMenu(){var menuArray= [
+      {   "title": "Inserting & Excising Rows", 
+              "buttons": [
+                  {"text": ["+1 Row Above:", ," ☰ ▲ "] ,"myFunction": this.insertRow.bind(this)}, 
+                  {"text":["+1 Row Below:", ," ☰ ▼ "], "myFunction": this.insertRow.bind(this)},
+                  {"text": ["Delete Row: "," ", " ✂ ☰"],"myFunction": this.deleteRow.bind(this)}, 
+                  {"text":["Restore Row: ","☤", " ☤ ☰ ☤ "], "myFunction": this.restoreRow.bind(this)}
+                ]
+              },
+
+        { "title":"Row Highlighting Patterns",
+           "buttons":
+          [ { "text": ["Add Odd Numbered Row Highlighting", " ", " "], 
+             "dataProperty":"background:",
+             "dataSetValue":this.background, 
+             "myFunction":this.alternatingHighlighter.bind(this), 
+             "dataArgs":[]
+            },
+
+          { "text": ["Add Even Numbered Row Highlighting", " ", " "], 
+             "dataProperty":"background:",
+             "dataSetValue":this.background, 
+             "myFunction":this.alternatingHighlighter.bind(this), 
+             "dataArgs":[]
+            },
+        { "text":["Remove Odd Numbered Row Highlighting"],
+              "dataProperty":"background:",
+              "dataSetValue": this.defaultFormat.background,
+              "dataFunction": "alternatingHighlighter", 
+              "myFunction":this.alternatingHighlighter.bind(this),
+                  "dataArgs":[ ]
+          },
+            { "text":["Remove Even Numbered Row Highlighting"],
+              "dataProperty":"background:",
+              "dataSetValue": this.defaultFormat.background,
+              "dataFunction": "alternatingHighlighter", 
+              "myFunction":this.alternatingHighlighter.bind(this),
+                  "dataArgs":[ ]
+          },
+                   {"text":["Begin and End Row Highlight On Tap", "",""],"myFunction":this.alternatingHighlighter.bind(this)},  
+            ], //End Six Button Page
+
+      }];
+       var returnArray=this.setDataArgs(menuArray);
+         return returnArray;
+      
+        },
+    get basemenu(){ var menuArray =[
+          {"title":"Highlight Color", 
+              "buttons":[
+              {"text":["Highlight Selection: ",""," ✒ ❚ "],"myFunction":this.stylePropertySelection.bind(this),"dataProperty": "background: ", "dataSetValue ": this.background}, 
+              {"text":["Remove Highlighting: ", ," ✂ ✒"], "myFunction":this.stylePropertySelection.bind(this), "dataProperty": "background: ",
+                "dataSetValue ": `${this.defaultFormat.background};`}]
+          },
+          {   "title": "Text Color",
+              "buttons": [
+              {"text":["Apply This Text Color:"," ✎" , "▀"], "myFunction":this.stylePropertySelection.bind(this), "dataProperty":"color:", 
+              "dataSetValue": this.color,
+                },
+              {"text":["Apply Base Text Color:"," ✎ " , "▀"], 
+              "myFunction":this.stylePropertySelection.bind(this),
+              "dataProperty": "color: ",
+              "dataSetValue":  this.defaultFormat.color}
+              ] 
+          },
+          {    "title": "Text Weight",
+                "buttons": [
+                    {"text":["Thin Text Weight:", ,"𝒯𝒽𝒾𝓃"],"myFunction":this.stylePropertySelection.bind(this),"dataProperty": "font-weight:","dataSetValue": " 300;"},
+                    {"text":["Medium Text Weight:", ,"Medium"],"myFunction":this.stylePropertySelection.bind(this), "dataProperty": "font-weight:","dataSetValue": " 600;"},
+                    {"text":["Strong Text Weight", "STRONG"], "myFunction":this.stylePropertySelection.bind(this), "dataProperty": "font-weight:", "dataSetValue": " 900;"
+              }
+            ] 
+          },
+          {  "title": "Font Family",
+             "buttons": [
+              {"text": ["Roboto Font Family", ," ROBOTO"],"myFunction":this.stylePropertySelection.bind(this), "dataProperty": "font-family:", "dataSetValue": "roboto;"},
+              {"text":["Merriweather Font Family", ," Merriweather"], "myFunction":this.stylePropertySelection.bind(this), "dataProperty": "font-family:", "dataSetValue": "merriweather;"},
+              {"text":["Courier Font Family: ", ," Courier"], "myFunction":this.stylePropertySelection.bind(this), "dataProperty": "font-family:", "dataSetValue":  "courier;"
+              }
+            ],
+          },
+          {   "title":"Font Styles",
+              "buttons": [
+                  {"text": [`Italics: Italics`],"myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-style:", "dataSetValue": " italic;"},
+                  {"text":["Underline:", ,"Underline"],"myFunction":this.stylePropertySelection.bind(this),"dataProperty":"text-decoration:", "dataSetValue":" underline;"},
+                  {"text": ["Strike-Through:", ,"Strike-Through"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"text-decoration:",  "dataSetValue":" line-through;"},
+                  {"text": ["Normal: ", , " Normal"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"text-decoration:", "dataSetValue": " none;"},
+                  {"text": ["Clear Italics:", , "Normal"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty": "font-style:","dataSetValue": " normal;"
+                } 
+              ], 
+            },
+            {   "title":"Font Size",
+              "buttons": [
+                  {"text":[`10px Smallest Large Screen Font`],"myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:10px;"},
+                  {"text":["12px", "","Smaller Than Shown"],"myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 12px;"},
+                   {"text": ["14px", "", "Slightly Smaller"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 14px;"},
+                  {"text": ["16px", "", "Slightly Smaller"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 16px;"},
+                  {"text": ["18px","", "Focused Standard"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 18px;"},
+                   {"text": ["20px", "", "Slightly Smaller"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 20px;"},
+                  {"text": ["22px","","Section Header Font"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 22px;"},
+                  {"text": ["24px","","Section Header Font"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 24px;"},
+                  {"text": ["26px","","Header Font"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 26px;"},
+                  {"text": ["28px","","Header Font"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 28px;"}, 
+                  {"text": ["30px","","Header Font"], "myFunction":this.stylePropertySelection.bind(this),"dataProperty":"font-size:",  "dataSetValue": " 30px;"},
+                  {"text": ["32px", "","Banner Font"],"myFunction":this.stylePropertySelection.bind(this), "dataProperty": "font-size:",  "dataSetValue": " 32px;"},
+                  {"text": ["34px", "","Banner Font"],"myFunction":this.stylePropertySelection.bind(this), "dataProperty": "font-size:",  "dataSetValue": " 34px;"},
+                  {"text": ["36px","", "Banner Font"],"myFunction":this.stylePropertySelection.bind(this), " dataProperty": "font-size:",  "dataSetValue": " 36px;"}
+              ], 
+            },
+       
+          ];
+
+            var returnArray=this.setDataArgs(menuArray);
+           return returnArray;
+    },
+    
+    observeGridEvent(newEvent, oldEvent){
+      if(newEvent&&newEvent!=oldEvent){ console.log(newEvent, oldEvent);}
+    },
+    
+    onGridEventChanged(){
+
+    },
+
+	getcolor(e){
+    		this.set("color", e.detail.color);
+    },
+  
+  chunkMutationForMultiDimensionalArrays(array,property, fullvalue, context,index, notify, unitArray){
+        var keys=array[0][0].id.split("_");
+        var cellClass="." + keys[0];
+        var mapName="m"+keys[0];
+        var arrayName=keys[0];
+        var p=0;
+        if(!unitArray || (unitArray&&index==context.arrayIndex)){
+          var nodeList=Polymer.dom(this.root).querySelectorAll(cellClass);
+         
+          var counter=nodeList.length;
+          }
+        else{
+          var counter=unitArray.length;
+        }
+        for(p=0;p<counter; p++){
+            if(!unitArray && notify===true){
+              var cell=nodeList[p];
+              var model=cell._templateInstance;
+              if(model.item.style.match(property)){
+                var replacer= new RegExp('(('+property+')+(\\w*|\\s*|:)+(\\w|\\s|\\-|\\#)+(;|(\\w|\\s|\\b)+;|\\b))+','g');
+                model.item.style=model.item.style.replace(replacer, "");
+              }
+              var cellStyle=model.item.style+fullvalue;
+               model.set("item.style",cellStyle);
+               model.item.style =cellStyle;
+               var key=cell.id;
+               keys=key.split("_");
+            }
+            else if(index==context.arrayIndex){
+                var cell=nodeList[p];
+                var model=cell._templateInstance;
+                var cellStyle=unitArray[p].style;
+                model.set("item.style",cellStyle);
+                model.item.style =cellStyle;
+                var key=cell.id;
+                keys=key.split("_");
+            }
+            else {
+              var cellStyle=unitArray[p].style;
+               var key=unitArray[p].id;
+               keys=key.split("_");
+             }
+            
+            var indi=parseInt(index);
+            var col=parseInt(keys[1]);
+            var row=parseInt(keys[2]);
+            if(unitArray&&index!=context.arrayIndex){
+                context.splice(["dataArrays",indi, col], row,1,unitArray[p]);
+                context[mapName].set(key,[unitArray[p].value, unitArray[p]]);
+                console.log(context.dataArrays[indi][col][row], "what is this value");
+            }
+            else{
+              context[mapName].set(key,[cell.value, cell]);
+            }
+            if(notify===true){
+              if(arrayName=="class20" || arrayName=="class22"){var version=3;}
+                    else{var version=2}
+              context.updateObjectStores(arrayName, version, key, "style", cellStyle); 
+            }
+        }
+        return context[arrayName];
+  },
+
+  stylePropertySelection(e){
+      var cell;
+      var key =this.gridEvent.target.id;
+      var keys=this.gridEvent.target.id.split("_");
+      var mapName="m"+keys[0];
+      var arrayName=keys[0];
+      var property=e.target.btnProperty;
+      var text=e.target.btnText;
+      var setValue =(property.match("color")&&text.match("This"))?this.color+";" + " ":(property.match("color")&&text.match("Base"))?this.defaultFormat.color+";" + " ":(property.match("background")&&text.match("Remove"))?this.defaultFormat.background+";" + " ":(property.match("background")&&(text.match("Add")||text.match("Selection")))?this.background+";" + " ": e.target.btnSetValue + " ";
+        var fullVal=(property!="value")?property+setValue: setValue;
+        var rowscols=50;
+      for(var i=1;i<rowscols;i++)
+        { 
+           var str="00000";
+
+          var co=(str+i).slice(-5);
+          if(keys[2]==0 && keys[1]!=0)
+          {   
+            rowscols=this[arrayName][0].length;
+            var newKey=keys[0]+"_"+keys[1]+"_"+co+"_";
+              
+           }
+          else if(parseInt(keys[1])==0 && parseInt(keys[2])!=0)
+          {
+              rowscols=this[arrayName].length;
+              var newKey=keys[0]+"_"+co+"_"+keys[2]+"_";
+          }
+          else if(parseInt(keys[1])==0 && parseInt(keys[2])==0)
+          {   
+            var changeArray= this.chunkMutationForMultiDimensionalArrays(this[arrayName],property, fullVal, this, this.arrayIndex, true);
+                   var e={};
+                      e.detail={"namesArray":[[arrayName,1]],"context":this,"isInit":false,"arrayIndex": this.arrayIndex, "spliceArray": this[arrayName], "property": property, "fullvalue": fullVal};
+              this.notifygrids(e);
+            break;
+          }
+          else{
+            var newKey=key;
+           i=52;
+           rowscols=2;
+            }
+          if(newKey){
+            // var payload=this[mapName].get(newKey);
+              var theId="#"+newKey;
+              var cell=this.$$(theId);
+              var model=cell._templateInstance;
+              var cellStyle=model.item.style;
+              if(property!="value"){
+                if(cellStyle.match(property))
+                  {
+                 var replacer= new RegExp('(('+property+')+(\\w*|\\s*|:)+(\\w|\\s|\\-|\\#)+(;|(\\w|\\s|\\b)+;|\\b))+','g');
+                  cellStyle=cellStyle.replace(replacer, "");
+                  }
+              cellStyle=cellStyle+fullVal + " ";
+              model.set("item.style",cellStyle);
+             // payload[1].style=cellStyle;
+              this.updateObjectStores(arrayName, 1, newKey, "style", cellStyle);
+          //    this[mapName].set(key,payload);
+            }
+            else if(property=="value"){
+               model.set("item.value",setValue);
+               payload[1].value=setValue;
+               console.log(payload[0]);
+               this.updateObjectStores(arrayName, undefined, newKey, "value", setValue);
+              this[mapName].set(key,payload);
+               //payload[0]=setValue;
+            }
+        }
+      }//end for
+      var e={};
+      e.detail={"namesArray":[[arrayName,1]],"context":this,"isInit":false,"arrayIndex": this.arrayIndex, "spliceArray": this[arrayName], "property": property,"fullvalue": fullVal};
+        this.notifygrids(e);
+  },
+
+notifygrids(e){
+  var gridNodes= document.querySelectorAll("FC-GRID");
+      console.log(gridNodes, "see who the nodes are");
+      var myHelperArray=[];
+       var changeArr=e.detail.context.dataArrays[e.detail.context.arrayIndex];
+      var counter=gridNodes.length;
+      for(var i=0; i<counter;i++){
+          if(gridNodes[i]&&gridNodes[i]!==e.target){
+            var index=e.detail.arrayIndex;
+            var unitArray=e.detail.spliceArray.reduce(function(pre, val, ind, arr){
+              pre=pre.concat(val);
+              return pre;
+            }, []);
+            console.log(unitArray);
+            gridNodes[i].chunkMutationForMultiDimensionalArrays(gridNodes[i].dataArrays[index],e.detail.property, e.detail.fullvalue, gridNodes[i],index, false,unitArray);
+
+          }
+        }
+      },
+
+  alternatingHighlighter(e){
+    var keys=this.gridEvent.target.id.split("_");
+    var mapName="m"+keys[0],arrayName=keys[0];
+    var p=0, btn=e.target,arr=[];
+    var text=btn.btnText;
+    var property=btn.btnProperty;
+    var setValue =(property.match("color")&&text.match("This"))?this.color+";" + " ":(property.match("color")&&text.match("Base"))?this.defaultFormat.color+";" + " ":(property.match("background")&&text.match("Remove"))?this.defaultFormat.background+";" + " ":(property.match("background"))?this.background+";" + " ": e.target.btnSetValue + " ";
+    var kp=(text.match("Column"))?1:text.match("Row")?2:-1;
+    var modEven=(text.match("Odd"))?false: true;
+      var cellClass="." + keys[0];
+      var nodelist;
+        if(kp===1 && modEven===false){
+          var twoClass=cellClass  + ".oddColumn";
+           nodelist=Polymer.dom(this.root).querySelectorAll(twoClass);
+           console.log(nodelist);
+           }
+        else if(kp===1&&modEven===true){
+            var twoClass=cellClass  + ".evenColumn";
+            nodelist=Polymer.dom(this.root).querySelectorAll(twoClass);
+        }
+        else if(kp===2&&modEven===true){
+              var twoClass=cellClass  + ".evenRow";
+            nodelist=Polymer.dom(this.root).querySelectorAll(twoClass);
+        }
+        else{
+            var twoClass=cellClass  + ".oddRow";
+            nodelist=Polymer.dom(this.root).querySelectorAll(twoClass);
+        }
+        var fullVal=property+setValue;
+        var counter=nodelist.length;
+        console.log(counter, fullVal, nodelist, property, setValue);
+        for(p=0;p<counter; p++)
+          {
+            var cell=nodelist[p];
+            var model=cell._templateInstance;
+            if(model.item.style.match(property))
+            {
+                var replacer= new RegExp('(('+property+')+(\\w*|\\s*|:)+(\\w|\\s|\\-|\\#)+(;|(\\w|\\s|\\b)+;|\\b))+','g');
+                model.item.style=model.item.style.replace(replacer, "");
+            }
+            var cellStyle=model.item.style+fullVal + " ";
+            model.item.style =cellStyle;
+            model.set("item.style",cellStyle);
+            var key=cell.id;
+            keys=key.split("_");
+            var col=keys[1];
+            var row=keys[2];
+            this.set([arrayName, col, row,".style"],cellStyle);
+          
+            this.updateObjectStores(arrayName, undefined , key, "style", cellStyle);
+          }
+          var e={};
+            e.detail={"namesArray":[[arrayName,1]],"context":this,"isInit":false,
+              "arrayIndex": this.arrayIndex, "spliceArray": this[arrayName], "property": property, "fullvalue": fullVal};
+          this.notifygrids(e);
+          return this[arrayName];
+      },
+      insertRow(e){
+        console.log(e, "this is my event", this.gridEvent);
+        var model=this.gridEvent.target._templateInstance;
+        var cell=model.item;
+        var key=cell.key;
+        var keys=key.split("_");
+      
+        console.log(key, keys, cell, model, "total columns number of any row",
+        this.indexedDataBases[this.arrayIndex].columns, "total columns number of any row");
+
+        var keys1=parseInt(keys[1]);
+        var keys2=parseInt(keys[2]);
+        var id=keys[0];
+        var time=new Date().getTime();
+        // var newCell={"key":key, "value":"--", "contenteditable": true, "id": id, "style":  cell.style, "name": "","class": "", "time": time, "archive":[], "closed": false};
+        var counter=this.selectedArraySet.length;
+        console.log(counter);
+        for(var i=0;i<counter;i++){
+          var nextCell=this.selectedArraySet[i][keys2];
+          console.log(nextCell.style);
+          var newCell={"key":"", "value":"--", "contenteditable": true, "id": "", "style":  nextCell.style, "name": "","class": "", "time": time, "archive":[], "closed": false};
+        this.splice(["selectedArraySet",i],keys2, 0,newCell);
+        }
+        this.reorderKeys(this.selectedArraySet);
+      },
+
+      reorderKeys(array){
+        var columns=array.length;
+        var rows=array[0].length;
+        var key=array[0][0].id;
+        var keys=key.split("_");
+        var name=keys[0];
+        for(var i=0;i<columns;i++){
+          columnArray=[];
+          for(var j=0; j<rows;j++){
+            var str="00000";
+            var col=(str+i).slice(-5);
+            var row=(str+j).slice(-5);
+            var nkey=name+"_"+col+"_"+row+"_";
+            this.set(["selectedArraySet", i, j, "id"],nkey);
+            this.set(["selectedArraySet", i, j, "key"],nkey);
+          }
+        }
+       var version=undefined; 
+       //this.indexedDataBases[this.arrayIndex].version;
+       console.log(this.selectedArraySet, this.indexedDataBases);
+        var newVersion=version+1;
+        var columns=this.selectedArraySet.length;
+        var rows=this.selectedArraySet[0].length;
+        var product=rows*columns;
+        this.notifyVersionChangeToIndex(name, newVersion, rows, columns, product);
+        this.initializeIndexDB(name, version,this.selectedArraySet)
+      },
+
+      initializeIndexDB(name, lastversion, newArray){
+        var data =newArray.map(function(colHolder){
+                return colHolder;
+                }).reduce(function(pre, val){
+              return pre.concat(val);
+          },[]);
+          var newVersion=lastversion;
+          console.log(newVersion);
+          this.setDataBase(name, newVersion, data);
+      },
+      notifyVersionChangeToIndex(name,version, rows, columns, product){
+        var indexArray=[];
+        var singletonArray=this.indexedDataBases.filter(function(val, index){
+         if (val.name==name){
+            indexArray.push(index); return true;
+                };
+            });
+          var count=indexArray.length;
+          singletonArray[0].version=version;
+          singletonArray[0].rows=rows;
+          singletonArray[0].columns=columns;
+          singletonArray[0].size=product;
+          this.splice("indexedDataBases",indexArray[0],1,singletonArray[0]);
+        if(count>1){
+          console.log(indexArray);
+          for(var i=1; i<indexArray.length; i++){
+            this.splice("indexedDataBases", indexArray[i],1);
+          }
+        }
+           var request = indexedDB.open("indexOfDatabases", 1);//"gridMap"
+          request.onerror = function(e)
+                {
+                  console.log("Unable to retrieve data from database! and stopped it!");
+                  e.stopPropogation();
+                };
+          request.onsuccess = function(event){
+              var db = event.target.result;
+              //console.log(db);
+              var transaction = db.transaction("cell", "readwrite");
+              var objectStore = transaction.objectStore("cell");
+              query = objectStore.get(name);
+              query.onerror = function(queryEvent)
+              {
+                  console.log("Unable to retrieve data from database!");
+                };
+              query.onsuccess = function(queryEvent) 
+              {
+                 var ref = queryEvent.target.result;
+                 
+                console.log(ref);
+                 ref.version=version;
+                 ref.rows=rows;
+                 ref.columns=columns;
+                 ref.size=product;
+                 var update = objectStore.put(ref);
+
+              update.onsuccess = function() {
+                 console.log(ref);
+                 console.log("we have updated the index ref0ref");
+              };
+        };
+
+      };
+
+      },
+
+      deleteRow(e){console.log(e);},
+      addColumn(e){console.log(e);},
+      deleteThisColumn(){},
+      restoreRow(){},
+      restoreThisColumn(){},
+
+ 
+     
+    updateOnValueChange(gridName, version, key, argToChange, setValue){
+            //here we should use the pouch and the other data synching they offer
+
+
+    },
+
+	}
+ FCBehaviors.FcGridStyleBehavior=[ FCBehaviors.FcGridInitializerBehavior,FCBehaviors.FcIndexedDbBehavior, FCBehaviors.FcGridStyleBehaviorImpl];
+</script>

@@ -1,0 +1,143 @@
+<dom-module id="fc-indexed-database">
+<style>
+paper-item{
+  border: 1px silver solid;
+  margin: 1px;
+  font-size: 14px; 
+  font-family: merriweather;
+  text-align: left;
+  @apply(--layout-vertical);
+  @apply(--layout-flex);
+  @apply(--layout-start-justified);
+}
+paper-listbox{
+  overflow-y: scroll;
+  border: gold 4px ridge; min-width: 265px; margin: 32px 32px 32px 12px;
+}
+div{
+  text-align: left;
+  @apply(--layout-flex);
+   @apply(--layout-start-justified);
+}
+.primary{color: #009; font-size: 18px; font-weight: 600;@apply(--layout-flex);
+   @apply(--layout-start); }
+.secondary{color: brown; font-size: 14px; font-weight: 300;}
+  .tertiary{color: brown; font-size: 14px; font-weight: 300;}
+</style>
+<template id="fc-indexed-database-template">
+<paper-listbox>
+<template is="dom-repeat" items="{{indexedDatabases}}">
+<paper-item on-tap="checkDataBase">
+<div class="primary">
+DB: {{item.name}} V. {{item.version}} index: {{index}}
+</div>
+<div class="secondary">
+Cols: {{item.columns}} x Rows: {{item.rows}}, {{item.size}}cells,
+ </div>
+<div class="tertiary">
+ Time: {{item.time}} Coords: {{item.location}} <span style="{{isChangeSynced(item.changeFlag)}}"> &#9651;: {{item.changeFlag}}</span>
+ </div>
+</paper-item>
+</template>   
+</paper-listbox>
+</template>
+<script>
+FcIndexedDatabase=Polymer({
+  is: "fc-indexed-database",
+  behaviors:[FCBehaviors.FcGridStyleBehavior],
+  observers:["observeArrayIndex(arrayIndex)"],
+  properties: {
+      userParams:{
+          type:Object,
+          value:function(){return {};},
+          notify: true,
+              //use a getter here to grab the params fom the login? 
+              //from where firebase? uggh... should hold params in local storage 
+              //with some funcadelic, woodblock, turing machine, encryption
+      },
+       sessionHistory:{
+          type: Array, 
+          value: function(){return [];},
+          notify: true,
+      },
+
+
+      activeCell:{
+          type: Object, 
+          value: function(){return{};},
+          notify: true,
+          observer:"observeActiveCell",
+      },
+
+    },
+
+  created(){},
+  ready(){ },
+  attached(){
+    console.log(this.indexedDB);
+    var data=this.viewIndexOfIndexedDatabases();
+    this.set("indexedDatabases", data);
+   
+  },
+  detached(){},
+
+  observeArrayIndex(arrayIndex){
+      //console.log(arrayIndex, this.arrayIndex);
+
+  },
+  checkDataBase(e){
+    console.log(e);
+    this.updateDataArraysFromIndexedDatabase(e.model.item.name, e.model.item.version, e.model.index, this);
+  },
+
+  
+  observeActiveCell(ncv, ocv){
+      if(ncv!=null){console.log(ncv, ocv);}
+  },
+  isChangeSynced(flag){
+      var retVal=(flag===true)?"color: red; background: yellow; font-size: 2em; font-weight: 600;": "color:green; background: white;font-size: 1.5em; font-weight: 600;";
+      return retVal;
+
+  },
+  observeDataArrays(ndav, odav){
+      // if(ndav!=null){console.log(ndav, odav);}
+  },
+  setDataBase(gridName, version, data){
+
+          var request = indexedDB.open(gridName, version);
+          request.onsuccess = function(event){   
+                var db = event.target.result;
+                console.log(gridName);
+                var transaction = db.transaction("cell", "readwrite");
+                var objectStore = transaction.objectStore("cell");
+                    data.forEach(function(ca,i,a){
+                          objectStore.put(ca);
+                    });
+                           console.log("db created"); 
+              };
+
+  },
+ logByTime(){
+            var now=new Date().getTime();
+            var lastUpdate=now-172800000;
+   request.onsuccess=function(event){
+              var db= event.target.result;
+              var transaction =db.transaction("cell", "readonly");
+              var objectStore = transaction.objectStore('cell');
+              var myIndex = objectStore.index('time'); 
+              var boundKeyRange=IDBKeyRange.bound(lastUpdate, now, false, false);
+              myIndex.openCursor(boundKeyRange).onsuccess = function(event) {
+                var cursor = event.target.result;
+                   if(cursor){ console.log(cursor.value.name, cursor.value.value, cursor.value.style);
+                  cursor.continue();}
+        else{console.log('Entries all displayed.');    
+         }
+       };
+     };
+ },
+
+ 
+ 
+});
+</script>
+
