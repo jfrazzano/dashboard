@@ -1,0 +1,11 @@
+{
+  "name": "iron-splitter",
+  "version": "1.0.0-rc",
+  "private": true,
+  "main": "",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.2.0",
+    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout"
+  }
+}

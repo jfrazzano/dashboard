@@ -1,0 +1,159 @@
+<dom-module id="fc-relative-fit-wrapper">
+<template>
+  <style>
+    :host {
+      background: white;
+      color: #009;
+      height: 2500px;
+      position: relative!important;
+      overflow: scroll;
+    }
+    .stationary{
+      background: white;
+      cursor: pointer;
+      max-height:2500px;
+      height: 97.5vh;
+      overflow-y: scroll;
+    }
+    div{padding: 0px;
+        background: white;
+        border: 14px silver ridge;
+        height: 100%;
+        section{background: aqua;}
+  </style>
+
+<div id="myPanel" style="overflow-y: scroll; background: grey; height:[[computePanelHeight(positionTarget,cws)]]; width:[[computePanelWidth(positionTarget,cws)]];">
+<div style="position: absolute; left: 2px; top: 2px; width: 32px; height: 32px; border-radius: 50%; background:red; z-index: 2;">
+</div>
+ <!-- <iron-collapse id="seeElement" style="background:white;"> -->
+ <section class="stationary">
+    <content style="overflow-y: scroll;"></content>
+</section>
+<!--   </iron-collapse> -->
+</div>
+ </template>
+<script>
+FcFitWrapper=Polymer({
+    is: 'fc-relative-fit-wrapper',
+    behaviors: [
+      Polymer.IronFitBehavior,Polymer.IronResizableBehavior
+      // FCBehaviors.ResizableRootBehavior
+    ],
+    properties:{
+      _defaultTarget:{
+        value:function(){return Polymer.dom(this.root).querySelector("#gridBox78");},
+        notify: true
+      },
+      positionTarget:{
+        value: function(){return Polymer.dom(this.root.parentNode);},
+        notify: true
+    },
+    cws:{
+      type:String,
+      value:function(){return "out";},
+      notify: true,
+    },
+      parentN:{
+        type:Object,
+        value:function(){var parent= Polymer.dom(this).parentNode;
+          return parent;}
+      },
+      drags:{
+        type: Boolean,
+        value: function(){return false;},
+        notify: true,
+      },
+    },
+    ready(){
+      this.initialize();
+      this.openToSeeElement();
+        },
+    initialize(){
+      this.set("autoFitOnAttached",false);
+      this.set("dynamicAlign",true);
+      this.set("noOverlap", false);
+      this.set("verticalAlign","top");
+      this.set("horizontalAlign","left");
+        },
+    openToSeeElement(){
+      // this.$.seeElement.opened=true;
+    },
+      _computeFitInto(pt){
+       // console.log(pt);
+        if(pt && pt.parentNode){
+        var target=pt;
+        while(target.nodeName!="FC-MAPPED-GRID"){
+          target=target.parentNode;
+        }
+        return target;
+      }
+      },
+  dragsOff(){
+    this.set("drags", false);
+    this.set("draggable", false);
+    this.set("dragging", false);
+  },
+  dragsOn(){
+ this.set("drags", true);
+    this.set("draggable", true);
+    this.set("dragging", true);
+  },
+  specialRefit(target){
+   // console.log("in sp1");
+    this.set("positionTarget",target);
+    if(this._raf){
+     // console.log("in sp3");
+      this._raf && window.cancelAnimationFrame(this._raf);
+      this._raf=window.requestAnimationFrame(()=>{
+        this._raf = null;
+       // / console.log(this._raf);
+        if(target){ this.set("positionTarget", target);
+        // console.log("in sp4");
+      }
+        this.async(this.refit, 3);
+      });
+      }
+      else{this.refit(); console.log("in sp2");}
+      //console.log(target.style.width, target.style.height, window.getComputedStyle(target, null).getPropertyValue("width"), window.getComputedStyle(target, null).getPropertyValue("height"));
+      var newHeight=window.getComputedStyle(target, null).getPropertyValue("height");
+      this.computePanelWidth(target);
+      var newWidth=window.getComputedStyle(target, null).getPropertyValue("width");
+      this.computePanelHeight(target);
+    },
+ 
+    computePanelWidth: function(target, cws){
+        if(target && target.style && window.getComputedStyle(target, null).getPropertyValue("width")){
+      
+      var targetWidth= Math.floor(parseFloat(window.getComputedStyle(target, null).getPropertyValue("width"))*.98).toString()+"px";
+      if(cws="out"){
+        return "0px;"
+      }
+      else{return targetWidth}
+    }
+    },
+    computePanelHeight:function(target, cws){  
+        if(target && target.style && window.getComputedStyle(target, null).getPropertyValue("height"))
+        {
+     var targetHeight=Math.floor(parseFloat(window.getComputedStyle(target, null).getPropertyValue("height"))*.98).toString()+"px";
+        if(cws==="out"){
+          return "0px; border-radius: 50%; box-shadow: 3px 5px 13px 2px #afafaf"; 
+        }
+        else {return targetHeight;}
+      }
+    },
+    
+     attached: function(){
+        var self=this;
+        this.set("isResizing", true);
+        var self=this;
+        var par=Polymer.dom(this.root).parentNode;
+   // console.log(par);
+        this.click();
+        this.set("heightHolder", this.currentHeight);
+        this.set("_notifyingDescendant", true);
+       this.set("verticalAlign", "auto"); this.set("horizontalAlign", "auto");
+       this.set("dragState", this.drags);
+    },
+  });
+</script>
+</dom-module>

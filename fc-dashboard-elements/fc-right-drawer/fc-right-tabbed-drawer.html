@@ -1,0 +1,631 @@
+
+<link rel="import" href="../../bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-animated-pages.html">
+
+<link rel="import" href="../fc-buttons-blue-style-module.html">
+<link rel="import" href="fc-animated-drawer-page.html">
+
+<link rel="import" href="../../bower_components/iron-icons/communication-icons.html">
+
+<link rel="import" href="../../fc-firepad-scripts-and-behaviors/fc-firepad-behavior.html">
+<link rel="import" href="../fc-resizable-behaviors/fc-resizable-root-behavior.html">
+<link rel="import" href="fc-data-element.html">
+<link rel="import" href="../../fc-element-factories/fc-value-holder-two.html">
+<link rel="import" href="fc-main-drawer-page.html">
+<dom-module id="fc-right-tabbed-drawer">
+<template>
+	<style is="custom-style">
+		:host{
+			position: fixed;
+			top: 0px;
+			bottom: 0px;
+			right: 0px;
+			width: 100%;
+			min-height: 100vh;
+			height: 100%;
+			background:white;
+			max-width: 98vw;
+			display: flex;
+			border-left: 48px solid #aedefe;
+			@apply(--layout-horizontal-flex);
+			box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.4);
+			--paper-tab-content: { font-size: 24px;
+									font-family: Merriweather;
+									/*overflow-x: hidden;*/
+									color: black;
+									font-weight: 700;
+									/*background: #7baaf7;*/
+									border-left: 3px solid #f7cb4d;
+									border-right: 3px solid #f7cb4d;
+									};
+								@apply(--paper-tab-content);
+		}
+.right-header{
+	background: #f7cb4d;			
+	}
+neon-pages{
+	overflow: hidden;
+}
+
+.head{margin-top: 12px;}
+	</style>
+	<fc-data-element id="marvin" hidden></fc-data-element>
+	<paper-header-panel 
+		class="vertical layout fullbleed flex self-stretch" 
+		style="overflow-x: hidden;" 
+		mode="seamed">
+		<div 
+			class="paper-header" 
+			style="width: 100%;font-size: 14px; color: #006; padding: 24px 18px; margin: auto; ">
+			<paper-icon-button 
+				id="headerPanel"
+				icon="arrow-back" 
+				style="position: absolute; right:24px; top: 24px; z-index: 4; border-radius: 50%; opacity: 1; background: red;" 
+				on-tap="_onCloseMe">
+			</paper-icon-button>
+		</div>
+				 <!--HEADER AREA ENDS-->					
+		<div 
+			id="myNext" 
+			class="content vertical layout">
+		<neon-animated-pages
+		 	id="myNext2" class="flex gradBackground" attr-for-selected='data-transition' selected="[[mySelected]]">
+			<fc-main-drawer-page  style="padding-top: 75px;"
+					data-transition="default">
+					<template 
+						is='dom-repeat' 
+						class="horizontal layout flex wrap center center-justified" 
+						items="{{iconArray}}">
+						<section 
+							class="buttons"
+							style$="[[computedStyle(determine)]]" 
+							data-transition$="[[item.dDialogTwo]]">
+							<iron-icon 
+								id$="[[item.dDialogTwo]]"
+				        		icon$="[[item.iconUsed]]"  
+				        		class$="[[item.sectionClass]] buttons [[item.splitterClass]]"
+				        		data-transition$="[[item.dDialogTwo]]"
+				      			>
+							</iron-icon>
+						</section>
+					</template>
+				</fc-main-drawer-page>
+			<template is="dom-repeat" id="repeater" items={{iconArray}}>
+        				<fc-animated-drawer-page data-transition$="[[item.dDialogTwo]]" inside-selection="{{secondarySelected}}">
+        					<fc-value-holder-two hidden div-id="[[item.divId]]" is-firepad="[[item.isFirepad]]"></fc-value-holder-two>	
+							<div class="head horizontal layout flex nowrap self-stretch" id="{{item.dDialogTwo}}">
+									<paper-tabs
+            							id="{{item.dDialogTwo}}" 
+            							scrollable
+            							selected="{{name}}"
+            							style="overflow-x: scroll;"
+            							on-tap="_tabClicked"
+            							attr-for-selected="name"
+            							class="buttons horizontal layout flex nowrap">   
+            							<template is="dom-repeat" class="horizontal layout flex nowrap" items="{{item.tabDetails2}}" as="tab">   
+             								<paper-button data-name="{{tab.tabName}}" data-useful="{{tab.constructorObject.config}}" id$='[[tab.pageLinkId]]_buttonTab' meta="[[tab.meta]]" class$="[[tab.tabButtonClass]] tab-buttons" buttons scrollable>
+             									{{tab.tabName}}
+             								</paper-button> 
+  										</template>
+									</paper-tabs>
+        						</div>
+								<div id="fcTabContentHolder" class="mainish">
+									<fc-value-holder-two tab-clicked="{{tabClicked}}" data-object="{{item.tabDetails2}}" return-data-object="{{returnDataObject}}" obj-property-name="constructorObject">
+									</fc-value-holder-two>
+								</div>
+								
+								<div paper-header class="flex self-stretch" style="min-height: 50px; margin-top: 24px; background: magenta; width:50vw-64px;height: 100%; padding: 25px;">{{second.tabName}}</div>
+											<div id="tabContentContainer" class="tabeContentContainer">
+
+											{{second.name}} select {{second.selected}}
+
+												<content>
+
+
+												</content>
+
+											</div>
+																	
+	        					
+	        			
+        				</fc-animated-drawer-page>	
+        				</template>
+
+					 </neon-animated-pages>	
+
+			 	</div>
+							
+	</paper-header-panel>							
+	</template>
+	<script>
+		FcRightTabbedDrawer=Polymer({
+		  is:"fc-right-tabbed-drawer",
+			behaviors: [FCBehaviors.ResizableRootBehavior,
+						 FCBehaviors.FCFirepadBehavior
+						],	
+			listeners:{"button-click":"_onButtonClick"
+			},		
+			properties: {
+				mySelected: {
+					type: String,
+					value: 'default',
+					notify: true,
+				
+				},
+				returnDataObject:{
+					type:Object,
+					value:function(){return {};},
+					notify: true
+				},
+				
+				secondarySelected: {
+					type: String,
+					value: 'Titling',
+					notify: true,
+					observer: "secondarySelectedChanged"
+				},
+				responsiveWidth: {
+					type: String,
+					value: '0px',
+					notify: true,
+					reflectToAttributes: true
+				},
+				effectiveChildren:{
+					type:Array,
+					value:function(){var children=this.getEffectiveChildren();
+						return children;
+					},
+					notify: true
+				},
+				
+				route:{
+					type: String,
+				 	notify: true,
+				 	reflectToAttribute: true
+				}, 
+				leftHidden: {
+					type: Boolean,
+					value: false,
+					notify: true
+				},
+				mwidth: {
+					type: String,
+					value: function(){
+						return this.style.width;
+					},
+					notify: true
+				},
+				
+				notRouter:{
+					type: Boolean,
+					value: function(){
+						return true;
+					},
+					notify: true
+				},
+				selectedTab:{
+	                  type: String,
+	                  value: "0",
+	                  notify: true,
+	             },
+	             Tab_Group_Id:{ 
+	                  type: String, 
+	                  value: `Tab_Group_Number + Tab_Group_Name`,
+	                  notify: true
+	               },                
+	             Tab_Group_Name: { 
+	                  type: String, 
+	                  value: "MyNewTabGroup",
+	                  notify: true
+	             },
+	             Tab_Group_Number:{
+	                  type: String,
+	                  value:'000001',//increasing [five lead zeroes for mistakes]
+	                  notify: true
+	             },
+	             Number_Of_Tabs: {
+	                  type: Number, 
+	                  value: function(){return 8;}, //1-10 plus the 0 meta tab usually lead tab(tab[0] will carry metadata
+	                  notify: true
+	             },
+	            Tab_Names: {
+	                  type: Array, //array of all the junk in a tabGroup
+	                  value: function(){  
+	                       return [
+	                       		'Titling',
+	                       		'Content',
+	                       		'Preview',
+	                       		'Data',
+	                       		'Revision',
+	                       		'Fullpage',
+	                       		'Publish'
+	                            ];
+	                 },
+	                  notify: true
+	             },
+	            styleObject: {
+	                  type: Object,
+	                  value: function(){
+	                       var styleObject = {
+	                            "height": "100%",
+	                            "overflow-y": "scroll",
+	                            "border": "4px #000066 double",
+	                            "resize": "vertical"
+	                       }
+	                       return this.styleObject;
+	                       },
+	                  notify: true,
+	                  reflectToAttribute: true
+	             },
+	             foundHeight: {
+	                  type: String,
+	                  value: function(){
+	                     //  var currentHeight=this.clientHeight;
+	                       return "900px";
+	                  },
+	                  notify: true,
+	                  reflectToAttribute: true
+	             },
+	             foundWidth: {
+	                  type: String,
+	                  value: function(){
+	                       return "450px";
+	                  },
+	                  notify: true,
+	                  reflectToAttribute: true
+	             },
+	             userType: {
+	                  type: String, 
+	                  value: "admin",
+	                  notify: true
+	             },
+	             headerAdded: {
+	                  type: Boolean,
+	                  value: false, 
+	                  notify: true,
+	                  reflectToAttribute: true 
+	             },
+	             header:{
+	                       type: String,
+	                       value:'My Header',
+	                       notify: true
+	             },
+	           
+	             srcImg: {
+	                  type: String, 
+	                  value: "../../../images/icon_menu/sail-icons/silver_sail_small.png", 
+	                  notify: true
+	             }, 
+	             rows:{
+	                  type: Boolean,
+	                  value: true,
+	                  notify: true
+	             },
+	             numberOfRowsOrColumns: {
+	                  type: Number,
+	                  value: 5,
+	                  notify: true
+	             },
+	             firebaseLocation: {
+	                  type: String, 
+	                  value: "admin",
+	                  notify: true
+	             },
+	             tabClicked:{
+	             	type: String,
+	             	value: function(){return "";},
+	             	notify: true,
+	             },
+	        iconArray:{
+				type: Array,
+				notify: true
+			},
+			  	firepad: {
+			type:Object,
+			value:{},
+			notify: true,	
+		},
+		firepadRef: {
+			type:Object,
+			value:{},
+			notify: true,
+			reflectToAttributes: true	
+		}, 
+
+		dataEventArchive:{
+			type:Array,
+			notify: true,
+		},
+		
+},
+				computedStyle: function(determine){
+						return "box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.4); border-radius: 23;border: 0 6px 0px 6px; margin:  ";
+				},
+ _tabClicked(e){
+ 	console.log(e,
+ 	e.detail,
+ 	e.target);
+ 	var lame=e.target.dataUseful;
+ 	console.log(lame);
+ 	console.log(this.iconArray);
+ 	this.set("tabClicked",lame);
+ }, 
+ observeReturnData:function(newVal, oldVal){
+ 		if(newVal){
+ 			console.log(newVal, oldVal);
+ 			this.push("dataEventArchive",newVal);
+ 		}
+ },
+ _onButtonClick: function(e) {
+		  console.log(e);
+		  var button = e.detail;
+		   var selectedPage = button.getAttribute('data-transition');
+		 console.log("SELECTED PAGE", selectedPage);
+		  this.set('mySelected', selectedPage);
+		  console.log(this.iconArray);
+		},
+secondarySelectedChanged: function(e){
+	//console.log(this.secondarySelected);
+},
+_onCloseMe: function(e) {
+				//console.log("ON CLOSE ME", e.detail);
+				this.set('mySelected', 'default');
+			},
+ready: function(){
+	 (this.firepadElement)?this.loadFirepad():console.log('I checked if the firePadElementWereTrue in drawer', this.firepadElement);
+	},
+	attached(){
+		
+	},
+
+get iconArray(){
+					return [{	"sectionClass": "normal buttons blue-btn-class",
+							"dDialogOne": "focusedProfilePrime",
+ 							"iconUsed": "icons:account-circle",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "focusedProfilePrime",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum": "000",
+ 							"isFirepad": false,
+ 							"tabPageClass":"right mainish",
+ 							"tabDetails2": [
+ 											{ "tabName": "statistics",
+											  "pageLinkId": "dataMapper",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "inviso",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "inviso",
+											  "hidden":false,
+											  "constructorObject":{"constructor": FcTriad,"nodeName":"FC-TRIAD", "config":0,"constructorName":"FcTriad"},
+											},
+								            { "tabName": "profile",
+											  "pageLinkId": "contentSavingPage",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "buttons layout flex center",
+											  "constructorObject":{"constructor": FcTriad,"nodeName":"FC-TRIAD",
+											  "config":1,"constructorName":"FcTriad"},
+											},
+											{ "tabName": "milestones",
+											  "pageLinkId": "firePadPrime",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "flex",
+											  "constructorObject":{"constructor": FcCalendarDialog,"nodeName":"FC-CALENDAR-DIALOG", "config":2,"constructorName":"FcCalendarDialog"},
+											},
+										
+											
+											 {"tabName": "current focus",
+											  "pageLinkId": "dataSaver",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "",
+											  "constructorObject":{"constructor": FcTriad,"nodeName":"FC-TRIAD", "config":3,"constructorName":"FcTriad"},
+											},
+											{"tabName": "the future",
+											  "pageLinkId": "dataSaver",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "twoPanel flex",
+											  "constructorObject":{"constructor": FcMappedGrid,"nodeName":"FC-MappedGrid", "config":4,"constructorName":"FcMappedGrid"},
+											},
+											{"tabName": "General Grid",
+											  "pageLinkId": "polymorph",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "onePanel flex",
+											  "constructorObject":{"constructor": FcGrid,"nodeName":"FC-Grid", "config":5,"constructorName":"FcGrid"},
+											},
+											{ "tabName": "statistics",
+											  "pageLinkId": "dataMapper",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "twoPanel flex",
+											  "constructorObject":{"constructor": FcTriad,"nodeName":"FC-TRIAD", "config":6,"constructorName":"FcTriad"},
+											},
+			                            ],
+	                        "tabDataRef": "firePadPrime",
+	                        "secondaryControls": true,
+	                        "titlingInputs": [
+	                        					{ "tabName": "Profile",
+											  "pageLinkId": "contentSavingPage",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "buttons layout stretch center",
+											},
+											{ "tabName": "Milestones",
+											  "pageLinkId": "firePadPrime",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "flex"
+											},
+											{ "tabName": "Statistics",
+											  "pageLinkId": "dataMapper",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "twoPanel flex"
+											},
+											{"tabName": "Current Focus",
+											  "pageLinkId": "dataSaver",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": ""
+											},
+											 {"tabName": "The Future",
+											  "pageLinkId": "dataSaver",
+											  "otherInfo": "OtherInfo",
+											  "tabButtonsClass": "tab-buttons",
+											  "onTabClick": "onTabClick",
+											  "layoutClass": "hidden"
+											},
+								            
+			                            ]
+			                        },
+ 					
+ 						{
+							"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "loginMenu",
+ 							"iconUsed": "icons:spellcheck",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "loginMenu",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum": "000",
+ 							"isFirepad": true,
+ 							"tabPageClass":"left mainish",
+ 							"divId":""
+ 						},
+ 						{
+							"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "dragAdmin",
+ 							"iconUsed": "icons:hardware:dock",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "dragAdmin",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum": "001",
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "toDoList",
+ 							"iconUsed": "icons:list",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "toDoList",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum": "002",
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "completedTasks",
+ 							"iconUsed": "icons:toc",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "completedTasks",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum": "003",
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "clockTimer",
+ 							"iconUsed": "icons:alarm-on",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "clockTimer",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum": "004",
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "firePadPrime",
+ 							"iconUsed": "icons:spellcheck",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "firePadPrime",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum": "005",
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "geoCalculator",
+ 							"iconUsed": "icons:view-module",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "geoCalculator",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum" : "006",
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "calendar",
+ 							"iconUsed": "icons:today",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "calendar",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum" : "007",
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "readView",
+ 							"iconUsed": "icons:chrome-reader-mode",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "readView",
+ 							"dialogClass":"dialogClass",
+ 							'indexNum': '008',
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "howWeDoin",
+ 							"iconUsed": "icons:assessment",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "howWeDoin",
+ 							"dialogClass":"dialogClass",
+ 							'indexNum': '009',
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "whatToSee",
+ 							"iconUsed": "icons:visibility",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "whatToSee",
+ 							"dialogClass":"dialogClass",
+ 							'indexNum': '010',
+ 							"isFirepad": false,
+ 							"divId":''
+ 						},
+ 						{	"sectionClass": " normal buttons blue-btn-class",
+							"dDialogOne": "starRated",
+ 							"iconUsed": "icons:stars",
+ 							"iconClass": "menuItems-dark", 
+ 							"dDialogTwo": "starRated",
+ 							"dialogClass":"dialogClass",
+ 							"indexNum": '010',
+ 							"isFirepad": false,
+ 							"divId":''
+ 						}
+				];
+			}
+});
+	</script>
+</dom-module>

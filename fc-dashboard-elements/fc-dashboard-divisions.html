@@ -1,0 +1,1006 @@
+
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icons.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/communication-icons.html">
+
+<link rel="import" href="../fc-dashboard-elements/iron-splitter/iron-splitter.html">
+<link rel="import" href="../fc-dashboard-elements/fc-buttons-blue-style-module.html">
+<link rel="import" href="fc-right-drawer/fc-right-tabbed-drawer.html">
+<link rel="import" href="../fc-dashboard-elements/fc-relative-fit-wrapper.html">
+
+
+
+
+<dom-module id="fc-dashboard-divisions">
+<template strip-whitespace>
+<style>
+  :host{
+    @apply(--vertical-layout);
+    position: fixed;
+    top: 0px;
+    bottom: 0px;
+    left:0px;
+    right: -10px;
+    background: #aefded;
+    overflow: hidden;
+  }
+  
+    @media all and (min-width: 640px){
+      }
+    #dashboardRightDrawer{
+         height: 101vh; background:white; position: absolute; right: 0px; top: 0px; bottom: 0px; left; z-index:4;
+      }
+    #dashboardLeftDrawer{
+         height: 101vh; position: absolute; left: 0px; top: 0px; bottom: 0px; z-index:5;
+      }
+    .container {
+          min-height: 101vh;
+          border: 4px solid #aaa;
+      }  
+    #box1, #box3, #box5, #box6, #box11{
+          width: 50%; 
+        }
+    paper-material{max-height: 102vh;}
+    div{overflow: hidden;
+        height: 50%;
+          overflow-y: scroll;
+          max-height: 102%;
+        }
+    #box5, #box11{
+          min-height:198vh;
+      }
+#earth {
+  width: 120px;
+  height: 120px;
+  background: url(http://www.noirextreme.com/digital/Earth-Color4096.jpg);
+  border-radius: 50%;
+  background-size: 220px;
+  box-shadow: inset 16px 0 40px 6px rgb(0, 0, 0), inset -3px 0 6px 2px rgba(255, 255, 255, 0.2);
+  animation-name: rotate;
+  animation-duration: 36s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+@keyframes rotate {
+  from {
+    background-position-x: 0px;
+  }
+  to {
+    background-position-x: 420px;
+  }
+}
+    fc-relative-fit-wrapper{
+          cursor: move;
+        }
+    fc-relative-fit-wrapper>*{
+      @apply(--vertical-layout); 
+      @apply(--layout-flex);
+      @apply(--layout-self-stretch); 
+    } 
+    iron-splitter{
+      z-index:2;
+      position: static;
+    }
+    .contentContainer {
+        position: relative;
+        height: 100%;
+        top: 0px; bottom: 0px;  
+      }
+  </style>
+  <firebase-auth
+        location="[[firebaseURL]]"
+        provider="[[firebaseProvider]]"
+        on-login="onFirebaseLogin"
+        on-logout="onFirebaseLogout">
+    </firebase-auth>
+    <fc-time-keeper-light></fc-time-keeper-light>
+    <paper-toast id="errorToast">
+    </paper-toast>
+      <iron-media-query
+        query="[[_computeMediaQuery(forceNarrow, responsiveWidth)]]"
+        on-query-matches-changed="_onQueryMatchesChanged"></iron-media-query>
+ 
+<paper-material class="horizontal layout flex">
+<div class="horizontal layout flex self-stretch" is-resizing dragging draggable id="dashboardLeftDrawer" is-resizing style$="width:{{dashboardLeftDrawerCurrentWidth}}px;">
+<div id="earth" style="z-index: 99999; position: absolute; top: 5px; left: 445px;"></div>
+      <div class="vertical layout flex" style="min-height: 102vh; background: white;">   
+      <div 
+              class="layout vertical block justified"
+              on-tap="openMenu"
+              style="max-height: 200px; min-height: 110px; max-height: 160px; min-width: 200px; background: #fff;">
+              <img style="margin: 16px; min-width:200px; max-width: 200px; max-height: 98px;" src="../../../images/FC_frontpage_logo.png">
+               <fc-login-dialog id="loginDialog" on-down="loginDrawerWidthAdjustment" style="z-index:2000;"></fc-login-dialog>
+      </div>
+      <section horizontal layout style="height: 2px; background: #efefef; width: 100vw;">
+      <hr>
+      </section>
+<paper-button on-tap="consoleThis">IndexDB</paper-button>
+    <section class="layout horizontal wrap center-justified self-shrink leftDrawer" style=" color: black; min-height: 64px;"
+    on-track="trackHandler">
+      <template 
+            is='dom-repeat' 
+            class="horizontal layout flex wrap center center-justified" 
+            items="{{iconArray}}">
+            <section class="vertical layout flex nowrap center center-justified">
+            <section 
+              data-transition$="[[item.nodeName]]"
+              >
+              <iron-icon 
+                    icon$="[[item.iconUsed]]"  
+                    class$="[[item.sectionClass]]"
+                    data-transition$="[[item.nodeName]]"
+                    >
+              </iron-icon>
+            </section>
+            <span class="[[item.sectionClass]]">[[item.constructorName]]</span>
+            </section>
+          </template>
+     
+    </section>
+          <section class="horizontal layout flex">
+            <content select=".leftDrawer"></content>
+      </section>
+  </div>
+
+    <section on-down="dragsOff" id="dashboardLeftDrawer_resizer" on-track="_resize" on-up="dragsOn" is-resizing dragging draggable style$="position: relative; left:calc({{dashboardLeftDrawerCurrentWidth}}+12)px; bottom:0px; top: 0px; min-width:6px!important; height:103vh; cursor:ew-resize; padding: 1px; width: 12px!important; opacity: 1; background:#009; border-right: 2px solid #aecefe; z-index: 5;">
+    </section>
+
+</div>
+<!--left Drawer-End-->
+   <!--BOX CONTAINER ON DASHBOARD LAYOUT-->
+  <div class="contentContainer horizontal layout" id="contentContainer" style$="width:100%; position: relative; margin-right:[[dashboardRightDrawerCurrentWidth]]px; margin-left:{{dashboardLeftDrawerCurrentWidth}}px;"> 
+  <!--LEFT COLUMN CONTAINER ON DASHBOARD LAYOUT-->
+    <div id="box11">
+
+      <!--Left-TOP BOX FOR ZONE in LEFT COLUMN-->
+      <div class="flex dropzone" style$="height:{{heightLeftTop}}px; width:{{widthLeftTop}}px; overflow-y:scroll;"  parent-cws="in">
+        <fc-relative-fit-wrapper id="wrapperLt" cws="in" class="item wrapper" on-track="dragAndDrop" draggable drags>
+               
+        </fc-relative-fit-wrapper>
+      </div>
+      <!--END LEFT TOP BOX IN DASH BOARD-->
+      <!--LEFT COLUMN SPLITTER(row creator)-->
+          <iron-splitter signal="{{resize}}" style="background: silver; height: 12px; min-width: 100%;  border: 2px solid #efefef; max-width: 100vw;" ;" direction="up">
+          </iron-splitter>
+      <!--END LEFT COLUMN SPLITTER(row creator)-->
+      <!--BEGIN BOTTOM HALF OF LEFT COLUMN-->
+      <div id="box4" class='flex dropzone' style="overflow-y:scroll;" parent-cws="in">
+            <fc-relative-fit-wrapper id="wrapperLb" cws="in" class="item wrapper" on-track="dragAndDrop" draggable drags>       
+            </fc-relative-fit-wrapper> 
+   </div>
+  </div>
+    <iron-splitter signal="{{resize}}" style="top: 0px; bottom:0px; background: silver; width: 12px;  border: 2px solid #efefef;" direction="left"></iron-splitter>
+  <div id="box5" class="flex">
+        <div class="layout flex dropzone" parent-cws="in" style="height: 45vh; overflow-y:scroll;">
+            <fc-relative-fit-wrapper id="wrapperRt" style$="height:{{heightRightTop}}px; width:{{widthRightTop}}px;" cws="in" class="item wrapper" on-track="dragAndDrop" draggable drags>
+             
+            </fc-relative-fit-wrapper>
+        </div>
+<iron-splitter signal="{{resize}}" style="background: silver; height: 12px; min-width: 100%;  border: 2px solid #efefef; max-width: 100vw;" direction="up">
+</iron-splitter>
+      <div class="flex layout dropzone" parent-cws="in" style="overflow-y:scroll;">
+          <fc-relative-fit-wrapper id="wrapperRb" cws="in" class="item wrapper" current-height="{{currentHeight}}" current-width="{{currentWidth}}" on-track="dragAndDrop" draggable drags>
+          </fc-relative-fit-wrapper>
+      </div>
+    </div>
+  </div>
+  <!--Start Right Drawer-->
+  <div class="horizontal layout flex end" is-resizing dragging draggable id="dashboardRightDrawer" style$="width:{{dashboardRightDrawerCurrentWidth}}px; position: absolute; right:0px; top: 0px; bottom: 0px; min-height: 102vh; background: white;" >
+<section id="dashboardRightDrawer_resizer" on-down="dragsOff" on-track="_resize" on-up="dragsOn" is-resizing style$="position:relative; right:{{dashboardRightDrawerCurrentWidth}}px; left: 0px; bottom:0px; top: 0px; min-width: 12px; height: 103vh; cursor:ew-resize; padding: 1px; width:12px!important; opacity:1; border-left: 2px solid #aecefe; z-index:4; background: #009;">
+</section>
+                   <fc-right-tabbed-drawer id="drawer" config-object="" messages-in="{{messagesOutRightDrawer}}" style="max-width:99.4vw; position:absolute; right: -10px; top:0px; bottom: 0px;" class="vertical layout flex self-stretch">
+                 
+                   </fc-right-tabbed-drawer>
+</div>
+  </paper-material>
+ <!--  </fc-ddr-card> -->
+  </template>
+  <script>
+  "use strict";
+Polymer({
+  is:"fc-dashboard-divisions",
+    behaviors:[Polymer.IronResizableBehavior],
+    listeners: {'app-drawer-reset-layout': 'resetLayout',  "newPassageSelected": "listenToSelection", "objectStoresUpdated": "notifyGrids"},
+    observers: ['resetLayout(dashboardLeftDrawerCurrentWidth,dashboardRightDrawerCurrentWidth)'],
+    properties:{
+        hiddenProp:{
+            type: Boolean,
+            value: function(){return false;},
+            notify: true,
+        },
+        iconArray:{
+        type: Array,
+        value: function(){
+          return [
+            { "sectionClass": " normal buttons blue-btn-class",
+              "iconUsed": "icons:spellcheck",
+              "nodeName": "FC-CALENDAR-DIALOG",
+              "constructorName":"FcCalendarDialog",
+              //"constructor": FcCalendarDialog,
+            },
+            {
+              "sectionClass": " normal buttons blue-btn-class",
+              "iconUsed": "icons:account-circle",
+              "nodeName": "FC-MAPPED-GRID",
+              "constructorName":"FcMappedGrid",
+              //"constructor": FcMappedGrid,
+             },
+            {
+              "sectionClass": " normal buttons blue-btn-class",
+              "iconUsed": "icons:hardware:dock",
+              "nodeName": "FC-CALL-CENTER-DIALOG",
+              "constructorName":"FcCallCenterDialog",
+              //"constructor":FcCallCenterDialog,
+               },
+            
+            { "sectionClass": "normal buttons blue-btn-class",
+              "iconUsed": "icons:list",
+              "nodeName": "FC-DOUBLE-TAB-SET",
+              "constructorName":"FcDoubleTabSet",
+              //"constructor":FcDoubleTabSet,
+              },
+            { "sectionClass": "normal buttons blue-btn-class",
+              "iconUsed": "icons:toc",
+              "nodeName": "FC-EVENT-CALENDAR",
+             "constructorName":"FcEventCalendar",
+              //"constructor":FcEventCalendar,
+              },
+            { "sectionClass": "normal buttons blue-btn-class",
+              "iconUsed": "icons:alarm-on",
+              "nodeName": "FC-MAPPED-GRID-OO",
+              "constructorName":"FcMappedGridOo",
+              //"constructor":FcMappedGridOo,
+              },
+            { "sectionClass": "normal buttons blue-btn-class",
+              "iconUsed": "icons:spellcheck",
+              "nodeName": "FC-GRID-CONTAINER",
+               "constructorName":"FcGridContainer",
+              //"constructor":FcGridContainer,
+              },
+        
+            { "sectionClass": " normal buttons blue-btn-class",
+              "iconUsed": "icons:today",
+              "nodeName": "FC-GRID",
+                "constructorName":"FcGrid",
+            //  "constructor":FcGrid,
+              },
+            
+        ];
+            },
+          notify: true
+        },
+        layout:{
+          type: String,
+          value: function(){return "horizontal";},
+          notify: true
+        },
+        isResizing:{
+            type:Boolean,
+            value:function(){return false;},
+            notify: true,
+        },
+        currentHeight:{
+            notify: true
+        },
+        currentWidth:{
+          notify: true,
+        },
+        heightLeftTop:{
+          type: Number,
+          notify:true,
+          observer:"observeHeightTop",
+        },
+      widthLeftTop:{
+        type: Number,
+          notify:true,
+          observer:"observeHeightTop",
+        },
+      firebaseURL: {
+        type: String, 
+        value: "https://focused0ne.firebaseio.com/userInit",
+        notify: true
+        },
+      firebaseProvider: {
+        type: String,
+        value: 'password',
+        notify: true
+        },
+       containerWidth:{
+            type:Number,
+            computed:"computeContainerWidth(dashboardLeftDrawerCurrentWidth, dashboardRightDrawerCurrentWidth, screenWidth)",
+            observer:"_observeContainerWidth", 
+            notify: true,
+        },
+        params:{
+            type:Object,
+            value:function(){return {"hasAuth":true,"databaseUpdateWaiting":false, "id":"longJohnSilver_00001","lastConfig":"someDataDetailsConfig"};},
+            notify: true
+        },
+        stateChanged: {
+            type:Array,
+            computed:"_computeStateChanged(params)",
+            notify: true,
+        },
+        dashboardInitializationObserver:{
+            type: Object,
+            computed:'computeDashBoardElementInitialization(screenWidth, screenHeight,stateChanged)',
+            notify: true,
+          },
+        dashboardLeftDrawerCurrentWidth:{
+            type: Number,
+            value:function(){return 604;},
+            notify: true
+        },
+        notifyDescendants:{
+            type: Boolean,
+            value:function(){return true;},
+            notify: true,
+        },
+        dashboardRightDrawerCurrentWidth:{
+            type: Number,
+            value: function(){return 12;},
+            notify: true,
+        },
+        isWrapper:{
+            type: Boolean,
+            value: false,
+            notify: true
+        },
+        dragEl:{
+            type: Object,
+            notify: true 
+        },
+        wrapperDragEl:{
+            type: Object,
+            notify: true 
+        },
+        dataObject:{
+            type:Object,
+            notify: true,
+        },
+        iconArray2:{
+              type: Array,
+              notify: true,
+            },
+        counter:{
+          type:Number,
+          value:0,
+          notify: true,
+        },
+       
+        parentDragEl:{
+          type: Object,
+          notify: true //note this is the parent of both the wrapper and the cell template--it is the cell ["FC-PASSAGE-QUESTION-DISPLAY",FcPassageQuestionDisplay],["FC-GRID-CONTAINER",FcGridContainer],["FC-RQTVERSIONC",FcRqtversionc], ["FC-PASSAGE-DB-DISPLAY",FcPassageDbDisplay],["FC-PICKLE", FcPickle]
+        },
+        constructorArray:{
+          type: Array,
+          //value:function(){return [["FC-CALENDAR-DIALOG",FcCalendarDialog], ["FC-MAPPED-GRID",FcMappedGrid],["FC-CALL-CENTER-DIALOG",FcCallCenterDialog],["FC-DOUBLE-TAB-SET",FcDoubleTabSet],["FC-EVENT-CALENDAR",FcEventCalendar], ["FC-MAPPED-GRID-OO",FcMappedGridOo],["FC-GRID",FcGrid]];},
+          notify: true
+          },
+          responsiveWidth: {
+                type: String,
+                value: '980px'
+              },
+          elemMap:{
+              type: Map,
+              notify: true,
+          },
+          narrow: {
+                type: Boolean,
+                readOnly: true,
+                notify: true
+              },
+        firebaseURL: {
+                type: String, 
+                 value: "https://focused0ne.firebaseio.com/toDoLists",
+                notify: true
+        },
+       
+        screenWidth:{
+            type: Array,
+            value: function(){
+              var widthArray=[];
+                  var numberWidth=Math.ceil(window.innerWidth);
+                  widthArray.push(numberWidth);
+                  var width=numberWidth.toString()+"px";
+                  widthArray.push(width);
+                  return widthArray;
+            },
+            notify: true
+          },
+        screenHeight:{
+            type: Array,
+            value: function(){
+              var heightArray=[];
+                  var numberHeight=Math.ceil(window.innerHeight);
+                  heightArray.push(numberHeight);
+                  var height=numberHeight.toString()+"px";
+                  heightArray.push(height);
+                  return heightArray;
+            },
+            notify: true
+        },
+        elementHolderArray:{
+          type: Array,
+          value:function(){return [];},
+          notify: true,
+            },
+        thisMap:{
+          type: Map,
+          value: function(){var myMap = new Map();
+            var d=new Date().getTime();
+            d=d/60000;
+            var key="dashboard_"+d.toString();
+            var value=this;
+            myMap.set(key,value);
+            this.set("myMap", myMap);
+            return [key,value];
+          },
+        },
+        myMap:{
+          type: Map,
+          notify:true,
+          reflectToAttribute:true,
+        },
+        selectedLT:{
+          notify: true,
+          observer:"observeSelectedLT",
+        },
+        selectedLB:{
+          notify: true,
+          observer:"observeSelectedLB",
+        },
+        selectedRT:{
+          notify: true,
+          observer:"observeSelectedRT",
+        },
+        selectedRB:{
+          notify: true,
+          observer:"observeSelectedRB",
+        },
+        resize:{
+            type: Boolean,
+            value: function(){return false;},
+            notify: true,
+            observer: "observeResize",
+        },
+  dataEventArchive:{
+      type:Array,
+      notify: true,
+      value: [],
+  returnDataObject:{
+          type:Object,
+          value:function(){return{};},
+          notify: true,
+          observer: "observeReturnData",
+        },
+    },
+    messagesOutRightDrawer:{
+      type: Object, 
+      value: function(){
+      },
+    },
+      
+  },
+  // layoutSwap(){
+  //   var setVal=(this.layout.charAt(0)==="h")?"vertical":"horizontal";
+  //   this.set("layout", setVal);
+  // },
+    notifyGrids(e){
+     //console.log(e, e.detail.changeContext, e.target);
+      // var gridNodes= document.querySelectorAll("FC-GRID");
+      // console.log(gridNodes, "see who the nodes are");
+      // var myHelperArray=[];
+      //  var changeArr=e.detail.context.dataArrays[e.detail.context.arrayIndex];
+      // var extraElement=this.elemMap.get("FC-Grid");
+      // //this.splice([extraElement,"dataArrays"],changeArr);
+      // var counter=gridNodes.length;
+      // for(var i=0; i<counter;i++){
+      //     if(gridNodes[i]&&gridNodes[i]!==e.target){
+      //       myHelperArray.push(gridNodes[i]);
+      //    console.log("I GOT PAST THE IFs");
+      //       console.log(gridNodes[i]);
+      //       var index=e.detail.arrayIndex;
+      //       var unitArray=e.detail.spliceArray.reduce(function(pre, val, ind, arr){
+      //         pre=pre.concat(val);
+      //         return pre;
+      //       }, []);
+      //       console.log(unitArray);
+      //       gridNodes[i].chunkMutationForMultiDimensionalArrays(gridNodes[i].dataArrays[index],e.detail.property, e.detail.fullvalue, gridNodes[i],index, false,unitArray);
+           // getUpdatedObjectStores(e.detail.namesArray,gridNodes[i],e.detail.isInit,e.detail.arrayIndex,changeArr);
+           //console.log(gridNodes[i].dataArrays, changeArr,"look here");
+        //   }
+         
+        // }
+    },
+  observeReturnData:function(newVal, oldVal){
+    if(newVal){
+      var e={};
+      e.detail=newVal;
+      this.notifyGrids(e);
+      console.log(newVal, oldVal, "this is my observer");
+      this.push("dataEventArchive",newVal);
+    }
+ },
+ loginDrawerWidthAdjustment(e){
+  ////console.log(e);
+  this.set("dashboardLeftDrawerCurrentWidth", 220);},
+ consoleThis(){
+    var myMap = new Map();
+            var d=new Date().getTime();
+            d=d/60000;
+            var key="dashboard_"+d.toString();
+            var value=this;
+            myMap.set(key,value);
+            this.set("myMap", myMap);
+var request = indexedDB.open("dashboardDatabase", 4);
+request.onupgradeneeded = (function (event) {
+    var db = event.target.result;
+    // Create another object store called "names" with the autoIncrement flag set as true.    
+    var objStore = db.createObjectStore("fc-dashboard-divisions", { autoIncrement : true });
+    // Because the "names" object store has the key generator, the key for the name value is generated automatically.
+    // The added records would be like:
+    // key : 1 => value : "Bill"
+    // key : 2 => value : "Donna"
+    for (var i in this.myMap) {
+        objStore.put(this.myMap[i][key]);
+    }
+}).bind(this);
+},
+  created(){
+  },
+  ready(){
+    ////console.log(this.screenWidth, this.screenHeight, "in ready");
+  },
+  attached(){
+     ////console.log(this.constructorArray);
+        var holderArray=[], length=this.constructorArray;
+        ////console.log(this.constructorArray);
+        this.set("heightLeftTop",980);
+        this.set("currentHeight", 420);
+        var remwidth=this.containerWidth-this.widthLeftTop;
+        this.set("widthRightTop",remwidth);
+        ////console.log(this.widthRightTop);
+        this.set("currentWidth",remwidth);
+        //go with this content tags deprecated
+        //its now just an apend child in a slot
+        var elemMap=new Map();
+      //var elementsArray= this.constructorArray.map(function(func,index,array){
+        //   elemMap.set(func[0], new func[1]());
+          // return new func[1]();   
+     // },this);
+            ////console.log(elementsArray, elemMap);
+             // this.set("elemMap", elemMap);
+       
+        //this.set("elementHolderArray",elementsArray);
+        //this.implantElements(this.elementHolderArray);
+        
+    },
+    _observeContainerWidth(newVal, oldVal){
+        console.log(newVal, oldVal);
+    },
+    onFirebaseLogin: function(event) {
+        this.ref = new Firebase(this.firebaseURL + '/users/' + 
+                                                      event.detail.user.uid);
+        this.ref.on('value', function(snapshot) {
+          this.updateLayout(snapshot);
+        }.bind(this));
+      
+    },
+    onFirebaseError: function(event) {
+        this.$.errorToast.text = event.detail.message;
+        this.$.errorToast.show();
+          },
+  
+    onFirebaseLogout: function(event) {
+      this.updateLayout();
+   
+    },
+    updateLayout: function(snapshot) {
+        this.toDos = [];
+        snapshot.forEach(function(childSnapshot) {
+          var item = childSnapshot.val();
+          item.uid = childSnapshot.key();
+          this.push('layours', item);
+        }.bind(this));
+    },
+    observeHeightTop(nv, ov){
+    },
+   
+    openMenu(e){
+      ////console.log(e, this.$.loginDialog);
+      // this.$.loginDialog._openMenu(e);
+      // this.$.loginDialog.set("opened",true);
+      this.loginDrawerWidthAdjustment();
+      var newRtDrawerWidth=this.dashboardRightDrawerCurrentWidth+this.containerWidth;
+      this.set("dashboardRightDrawerCurrentWidth",newRtDrawerWidth);  
+      var tabbedDrawer=this.$$("FC-RIGHT-TABBED-DRAWER");
+      tabbedDrawer.mySelected="focusedProfilePrime";
+    },
+    observeResize(newVal, oldVal){
+        // //console.log(newVal, oldVal);
+        this.notifyResize();
+    },
+    computeContainerWidth(left, right, screen){
+          var rt=this.dashboardRightDrawerCurrentWidth, lt=
+          this.dashboardLeftDrawerCurrentWidth;
+          var dx=(lt===0&&rt===0)?0:(lt===0||rt===0)?24:48; 
+            var delta=(rt+lt+dx); 
+            var width=screen.availWidth;
+           this.set("screenWidth",width);
+            var setVal=(this.screenWidth-delta);
+            return setVal;
+    },
+    didItFire(e){////console.log(e.detail.newSelected);
+    },
+    listenToSelection(e){
+      ////console.log(e.detail.newSelected, "YOU GOT THE KEY");
+      var elem = this.$$("FC-PASSAGE-QUESTION-DISPLAY"); 
+      ////console.log(elem);
+      if(elem){
+      elem.set("sharedSelection", e.detail.newSelected);
+      ////console.log(elem.sharedSelection);
+        }
+      this.fire("newPassageSelectedTwo", {"newSelected": e.detail.newSelected});
+      },
+    
+    _computeStateChanged(params){},
+    computeDashBoardElementInitialization(nameOfElement,hasStateChange,screenWidth, screenHeight){
+      if(hasStateChange===false){
+        this.somefunctiontoloadlastsavedstatefromcache();
+        return
+      }
+    },
+    somefunctiontoloadlastsavedstatefromcache(){
+      },
+    implantElements(elemArr){
+        var children=elemArr;
+        ////console.log(children);
+        ////console.log(children, this.screenWidth, this.screenHeight, "in the elemcreator attached async");
+    },
+    computeOptionsArray(item, val){
+      if(this.__data__[item]==undefined){ return item;}
+      else{
+      return this.__data__[item];
+      }
+    }, 
+    _computeListItemData(itemData, courses, someArray, outputs){
+      if(itemData=="courses"){this.async(function(){return this[itemData];}, 1500);}
+       else{return this[itemData];}
+    },
+    trackHandler(e){
+        this.set("hiddenProp",true);
+        ////console.log(e, e.target.dataset.transition);
+        var elem=this.elemMap.get(e.target.dataset.transition);
+        ////console.log(elem);
+        switch(e.detail.state){
+            case 'start':
+            e.preventDefault();
+            break;
+            case 'track':
+            break;
+            case 'end':
+                var dropTarget= e.detail.sourceEvent.toElement;
+                var bool =Polymer.dom(dropTarget).classList.contains("wrapper");
+                ////console.log(bool);
+                while(!bool && dropTarget.nodeName!="FC-RELATIVE-FIT-WRAPPER"&&dropTarget.nodeName!=="FC-DASHBOARD-DIVISIONS")
+                    {
+                        dropTarget=dropTarget.parentElement;
+                        var bool =Polymer.dom(dropTarget).classList.contains("wrapper");
+                    }
+                    var elemInDropTarget=Polymer.dom(dropTarget).firstElementChild;
+                    ////console.log(elemInDropTarget, "LOOK HERE FOR ELEMENTS");
+                    if(bool && !elemInDropTarget){
+                          Polymer.dom(dropTarget).appendChild(elem);
+                          self.dragging=false;
+                          Polymer.dom.flush();
+                    }
+                    else if(bool && elemInDropTarget){
+                        if(elemInDropTarget.nodeName&&this.elemMap.has(elemInDropTarget.nodeName)){
+                          Polymer.dom(dropTarget).removeChild(elemInDropTarget);
+                          this.elemMap.set(elemInDropTarget.nodeName,elemInDropTarget);
+                          Polymer.dom(dropTarget).appendChild(elem);
+                          self.dragging=false;
+                          Polymer.dom.flush();
+                        }
+                    }
+                    this.set("hiddenProp",false);
+            break;
+            case 'default':
+            break;
+          }
+    },
+    dragAndDrop(e){
+        var targ=e.target;
+        event.preventDefault;
+        while(targ.classList.contains("item")!==true && targ.nodeName!="PAPER-MATERIAL" && targ.classList.contains("stationary")!==true)
+                {targ=targ.parentElement;}
+        if(targ.classList.contains("stationary")==true){this.drags=false;}
+        else if(targ.classList.contains("item")==true && targ.classList.contains("wrapper")===true)
+                {
+                        this.set("wrapperDragEl", targ);
+                        var par=Polymer.dom(targ).parentNode;
+                        // //console.log(par);
+                        this.set("parentDragEl",par);
+                        // //console.log(this.wrapperDragEl, "leaving dragStart");
+                        this.set("isWrapper",true);
+                        var childrenArr=Polymer.dom(targ).childNodes;
+                          var dragEl= childrenArr.find(function(val){return(val.nodeName.charAt(0)==="F" & val.nodeName.charAt(1)==="C");});//add try catch
+                        // //console.log(dragEl, "look here for dragEl");
+                        this.set("dragEl", dragEl);
+                        self=this.wrapperDragEl;
+              
+            switch(e.detail.state){
+                    case 'start':
+                        // self._leftprime = parseInt(window.getComputedStyle(targ).getPropertyValue("left"))-e.detail.x;
+                        // self._topprime = parseInt(window.getComputedStyle(targ).getPropertyValue("top"))-e.detail.y;
+                        //  self.changeX=0;
+                        //  self.changeY=0; 
+                    break;
+                    case 'track':
+                          e.preventDefault();
+                         // self.changeX=e.detail.ddx + self.changeX; //SELF ISSUE
+                         // self.changeY=e.detail.ddy + self.changeY;
+                         // this.wrapperDragEl.translate3d(self.changeX.toString() + 'px', self.changeY.toString() + 'px', 0);
+                        break;
+                    case 'end':
+                        var lt=e.detail.sourceEvent.toElement;
+                        var bool =Polymer.dom(lt).classList.contains("wrapper");
+                        while(!bool && lt.nodeName!="FC-RELATIVE-FIT-WRAPPER")
+                         {
+                            lt=lt.parentElement;
+                             var bool =Polymer.dom(lt).classList.contains("wrapper");
+                             //console.log(bool, lt);
+                         }
+                        if(bool && this.isWrapper==true){
+                          var parent=lt.parentElement;
+                          this.set("lt.cws",this.parentDragEl.parentCws);
+                          this.set("wrapperDragEl.cws", parent.parentCws);
+                          Polymer.dom(this.parentDragEl).insertBefore(lt, this.wrapperDragEl);
+                          Polymer.dom(parent).appendChild(this.wrapperDragEl);
+                          self.dragging=false;
+                           Polymer.dom.flush();
+                        }
+                    break;
+                  }//close switch???
+              }//close wrapper//close item
+        },
+        _computeWrapperState(transformWrapperStyle, cws)
+        {
+          if(cws==="out"){
+            return "height: 36px; width: 36px; border:solid gold 6px; background: purple; box-shadow: 4px 8px 16px 5px #aeaeae;";
+          }
+          else return "";
+        },
+      
+        allowDrop(e){e.preventDefault();},
+    _resize: function(e){
+            e.preventDefault();
+            this.isResizing=true;
+            var nId=e.target.attributes.id.value.split("_"),theId="#"+nId[0], elem=this.$$(theId);
+            this.set("theMovingElement",elem);
+            var width=Math.floor(parseFloat(window.screen.width));
+            var height=Math.floor(parseFloat(window.screen.height)*.999);
+            if(this.isResizing===true){
+              var widthString=nId[0]+"CurrentWidth";
+            switch(e.detail.state) {
+              case 'start':
+                var sWidth =window.getComputedStyle(elem, null).getPropertyValue("width");
+                    sWidth = Math.floor(parseInt(sWidth));
+                    this.set(widthString, sWidth);
+                break;
+              case 'track':
+                    var rol=(widthString.match("Right") && widthString.match("Right").length>0)?"right":"left";
+                    var change = (widthString.match("Right") && widthString.match("Right").length>0)?[(-e.detail.ddx),"Left","Right"]: [e.detail.ddx,"Right","Left"];//here i chose to place the "negative" string value in position 1, as it is needed below; I placed the "true" value in 1 as it may be needed shortly
+                    var nwidth=this[widthString]+parseFloat(change[0]),
+                    oppositeSide="dashboard"+change[1].toString()+"DrawerCurrentWidth";
+                    var trueWidth=(nwidth<15)?15:(nwidth>width)? width:nwidth;
+                    // (nwidth+this[oppositeSide]>width)?Math.ceil(parseFloat(width-this[oppositeSide])): should check here for over lap;
+                    // // trueWidth=(trueWidth<0)?(-1*trueWidth):trueWidth;
+                    // //console.log(trueWidth);
+                    this[widthString]=trueWidth;
+                    var holder=trueWidth;
+                    var holder=holder.toString()+"px";
+                    Polymer.dom(elem).setAttribute("style.width",holder);
+                    this.notifyResize();
+                break;
+              case 'end':
+                   Polymer.dom(elem).setAttribute("style.width",holder);
+                     this.notifyResize();
+                    Polymer.dom.flush();
+              break;
+                }
+              }
+    },
+    changeCentersMargins(){
+    },
+    calculateContentContainerWidth(ltdrawerWidth, rtdrawerWidth){        
+      var rt=this.dashboardRightDrawerCurrentWidth, lt=
+      this.dashboardLeftDrawerCurrentWidth;
+      var dx=(lt===0&&rt===0)?0:(lt===0||rt===0)?12:24; 
+      var delta=(rt+lt+dx); 
+      //console.log(delta);
+      var centralWidth=this.screenWidth[0]-delta;
+             //console.log(dx,this.screenWidth);
+      this.set("centralWidth", centralWidth);
+      return delta;
+    },
+    set movingApiElement(argument){},
+    get movingApiElements(){
+          if(this.movingElementsArray&&this.movingElementsArray.length>0){
+          var contentArrayToResizeOrMove=this.movingElementsArray.map(function(val,i, arr){
+          return Polymer.dom(this.$[val]).getDistributedNodes()[0];
+          }, this);
+          return contentArrayToResizeOrMove;
+        }
+      },
+      get drawer(){return this.$.drawer;},
+    resetLayout: function() {
+          this.debounce('_resetLayout', function() {
+            if (!this.isAttached)
+              {return;}
+            else if(this.screenWidth[0]<1200)
+              {this.slideBackForLayoutTwo();}
+            else if(this.screenWidth[0]<720)
+              {this.slideBackForLayoutThree()}
+            else if(this.screenWidth[0]<480)
+            {this.slideBackForLayoutThree();}
+             
+            // if (this.narrow) {
+            //     this[userLayoutChoice]
+            //   this.$$drawer.opened = drawer.persistent = false;
+            //   contentContainer.classList.add('narrow');
+            //   contentContainer.style.marginLeft = '';
+            //   contentContainer.style.marginRight = '';
+            // } else {
+            //   drawer.opened = drawer.persistent = true;
+            //   contentContainer.classList.remove('narrow');
+            //   if (drawer.position == 'right') {
+            //     contentContainer.style.marginLeft = '';
+            //     contentContainer.style.marginRight = this.dashboardRightDrawerCurrentWidth + 'px';
+            //   } else {
+            //     contentContainer.style.marginLeft = this.dashboardRightDrawerCurrentWidth + 'px';
+            //     contentContainer.style.marginRight = '';
+            //   }
+            // }
+                   // this.setcontainerwidth()
+            this.notifyResize();
+           });
+          
+        },
+        slideBackForLayoutTwo(){},
+        slideBackForLayoutThree(){},
+        slideBackForLayoutThree(){},
+      _onQueryMatchesChanged: function(event) {
+        this._setNarrow(event.detail.value);
+      },
+      _computeMediaQuery: function(forceNarrow, responsiveWidth) {
+        return forceNarrow ? '(min-width: 0px)' : '(max-width: ' + responsiveWidth + ')';
+      },
+      dragsOff: function(){this.set("drags", false);},
+      dragsOn: function(){ if(this.dragState){this.async(this.dragSwitch, 50);}},
+      dragSwitch: function(){this.set("drags", true);},
+      handleDrop(e){ },
+      observeSelectedLT(newVal, oldval){
+      //console.log(newVal,oldval);
+     var insertElement=this.elemMap.get(newVal);
+     console.log(insertElement, insertElement, insertElement, insertElement, newVal, newVal, newVal);
+     //console.log(insertElement,"here is where the map false should be");
+     if(oldval!==undefined && newVal===oldval){
+      //console.log("we do nothing here");
+     }
+     else if(oldval!==undefined && insertElement!=null){
+       var removeElement =Polymer.dom(this.$.wrapperLt).firstElementChild;
+       Polymer.dom(this.$.wrapperLt).insertBefore(insertElement,removeElement);
+       Polymer.dom(this.$.wrapperLt).removeChild(removeElement);
+      var nodeName=removeElement.nodeName.toString();
+      //console.log(nodeName);
+      nodeName=nodeName.replace(/A-Z/g, function(nodeName){ return nodeName.toLowerCase();}),
+      //console.log(nodeName);
+      nodeName.charAt(0).replace(nodeName.charAt(0).toUpperCase());
+      //console.log(nodeName);
+      nodeName.replace("-","");
+      //console.log(nodeName); 
+     }
+     else if(insertElement==null){
+      //console.log("wait", insertElement);
+     }
+     else{
+      //console.log(Polymer.dom(this.$.wrapperLt).firstElementChild);
+      Polymer.dom(this.$.wrapperLt).insertBefore(insertElement,Polymer.dom(this.$.wrapperLt).firstElementChild);
+     }
+     
+  },
+  observeSelectedLB(newVal, oldval){
+      //console.log(newVal,oldval);
+     var insertElement=this.elemMap.get(newVal);
+     //console.log(insertElement,"here is where the map false should be");
+     if(oldval!==undefined && newVal===oldval){
+      //console.log("we do nothing here");
+     }
+     else if(oldval!==undefined && insertElement!=null){
+       var removeElement =Polymer.dom(this.$.wrapperLb).firstElementChild;
+       Polymer.dom(this.$.wrapperLb).insertBefore(insertElement,removeElement);
+       Polymer.dom(this.$.wrapperLb).removeChild(removeElement);
+      var nodeName=removeElement.nodeName.toString();
+      //console.log(nodeName);
+      nodeName=nodeName.replace(/A-Z/g, function(nodeName){ return nodeName.toLowerCase();}),
+      //console.log(nodeName);
+      nodeName.charAt(0).replace(nodeName.charAt(0).toUpperCase());
+      //console.log(nodeName);
+      nodeName.replace("-","");
+      //console.log(nodeName); 
+     }
+     else if(insertElement==null){
+      //console.log("wait", insertElement);
+     }
+     else{
+      //console.log(Polymer.dom(this.$.wrapperLb).firstElementChild);
+      Polymer.dom(this.$.wrapperLb).insertBefore(insertElement,Polymer.dom(this.$.wrapperLb).firstElementChild);
+    }
+  },
+  observeSelectedRT(newVal, oldval){
+       //console.log(newVal,oldval);
+     var insertElement=this.elemMap.get(newVal);
+     //console.log(insertElement,"here is where the map false should be");
+     if(oldval!==undefined && newVal===oldval){
+      //console.log("we do nothing here");
+     }
+     else if(oldval!==undefined && insertElement!=null){
+       var removeElement =Polymer.dom(this.$.wrapperRt).firstElementChild;
+       Polymer.dom(this.$.wrapperRt).insertBefore(insertElement,removeElement);
+       Polymer.dom(this.$.wrapperRt).removeChild(removeElement);
+      var nodeName=removeElement.nodeName.toString();
+      //console.log(nodeName);
+      nodeName=nodeName.replace(/A-Z/g, function(nodeName){ return nodeName.toLowerCase();}),
+      //console.log(nodeName);
+      nodeName.charAt(0).replace(nodeName.charAt(0).toUpperCase());
+      //console.log(nodeName);
+      nodeName.replace("-","");
+      //console.log(nodeName); 
+     }
+     else if(insertElement==null){
+      //console.log("wait", insertElement);
+     }
+     else{
+      //console.log(Polymer.dom(this.$.wrapperRt).firstElementChild);
+      Polymer.dom(this.$.wrapperRt).insertBefore(insertElement,Polymer.dom(this.$.wrapperRt).firstElementChild);
+        }
+  },
+  observeSelectedRB(newVal, oldval){
+       console.log(newVal,oldval);
+     var insertElement=this.elemMap.get(newVal);
+     console.log(insertElement,"here is where the map false should be");
+     if(oldval!==undefined && newVal===oldval){
+      //console.log("we do nothing here");
+     }
+     else if(oldval!==undefined && insertElement!=null){
+       var removeElement =Polymer.dom(this.$.wrapperRb).firstElementChild;
+       Polymer.dom(this.$.wrapperRb).insertBefore(insertElement,removeElement);
+       Polymer.dom(this.$.wrapperRb).removeChild(removeElement);
+      var nodeName=removeElement.nodeName.toString();
+      //console.log(nodeName);
+      nodeName=nodeName.replace(/A-Z/g, function(nodeName){ return nodeName.toLowerCase();}),
+      //console.log(nodeName);
+      nodeName.charAt(0).replace(nodeName.charAt(0).toUpperCase());
+      //console.log(nodeName);
+      nodeName.replace("-","");
+      //console.log(nodeName); 
+     }
+     else if(insertElement==null){
+      //console.log("wait", insertElement);
+     }
+     else{
+      //console.log(Polymer.dom(this.$.wrapperRb).firstElementChild);
+      Polymer.dom(this.$.wrapperRb).insertBefore(insertElement,Polymer.dom(this.$.wrapperRb).firstElementChild);
+        }
+        },
+  });
+</script>
+</dom-module> 
