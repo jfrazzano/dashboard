@@ -1,0 +1,222 @@
+
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/communication-icons.html">
+<link rel="import" href="../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../bower_components/iron-icons/hardware-icons.html">
+<link rel="import" href="../bower_components/iron-icons/notification-icons.html">
+<link rel="import" href="../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../bower_components/iron-icons/places-icons.html">
+<link rel="import" href="../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../bower_components/iron-menu-behavior/iron-menubar-behavior.html">
+<link rel="import" href="../fc-grid/fc-draggable-behavior.html">
+<link rel="import" href="fc-dialog-toolbar.html">
+
+<dom-module id="fc-drag-header-menu">
+<template>
+<style>
+:host {
+  position:fixed;
+  overflow: hidden;
+  overflow-x: scroll;
+  background: #009;
+  width: ;
+}
+.menubuttons{
+  display: inline-block; 
+  width: 36px; 
+  height: 36px;
+  background: silver;
+  z-index: 1;
+  box-shadow: 0px  -5px 15px #d9d9d9 inset;
+  align-items: flex-start;
+    text-align: center;
+    cursor: pointer;
+    color: buttontext;
+    border-image-source: initial;
+    border-image-slice: initial;
+    border-image-width: initial;
+    border-image-outset: initial;
+    border-image-repeat: initial;
+    /*background-color: buttonface;*/
+    box-sizing: border-box;
+    padding: 2px 6px 3px;
+    /*border: 2px outset buttonface;*/
+}
+.longer{width: 64px;}
+.longest{width: 108px;}
+.mini{width: 64px; height: 48px; color: green; border: 1px solid #008; font-size: 12px;}
+.micro{color: #008; width: 16px; height: 16px;} 
+.menuItems-light{
+  color: #aedafd;
+  vertical-align: center;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+</style>
+<div id="protoMenu"  class="horizontal layout flex" style$='max-height: 96px; width:calc({{currentWidth}}-45)px; min-height: 24px; min-width: 160px!important; background: #009; border: 3px ridge silver;'>
+  <span draggable$="[[_computestaticmenu(dragmenu)]]" hidden="[[_computestaticmenu(dragmenu)]]">
+      <iron-icon name="fcdragtag" draggable$="[[_computestaticmenu(dragmenu)]]" icon="icons:label-outline" description="the dragable edge of the card" class="menuItems-light">
+      </iron-icon>     
+  </span>
+  <section class="menubuttons longer" style="min-width: 63px; height: 48px; width: 63px !important; max-width: 64px; font-size: 24px" on-tap="_toggleLeftDrawer" >
+      <b>L</b>
+      <iron-icon icon="icons:swap-horiz" class="menuItems-dark">
+      </iron-icon>
+  </section>
+  <section id="tabsContainer" style="width: px" on-down="dragsOff">
+    <content>
+    </content>
+ </section>
+
+  <section class="menubuttons mini"  on-tap="swapMenu" style="z-index: 7; position: absolute; right: 99px;">MENU
+      <iron-icon icon="icons:autorenew" class="menuItems-dark micro">
+      </iron-icon>SWAP
+  </section> 
+  <section class="menubuttons longer layout horizontal" style="min-width: 63px; height: 48px; width: 63px !important; max-width: 64px; font-size: 24px; position: absolute; right: 34px;" on-tap="_toggleRightDrawer">
+      <iron-icon icon="icons:swap-horiz"  class="menuItems-dark"></iron-icon>
+      <b>R</b>
+  </section> 
+<section on-down="dragsOff" on-up="dragsOn" style="background: #009; height: 92%; position: absolute; right: 2px; top: 1px; bottom: 1px; min-width:32px;">
+  <iron-icon draggable="[[_computestaticmenu(dragmenu)]]" track icon="icons:input" style="background: #000066; position: absolute; right: 1px; min-width:30px;" on-track="_resetWidth" class="center center-justified menuItems-light">
+  </iron-icon>
+</section>        
+</div>
+</template>
+<script>
+FcDragHeaderMenu = Polymer({
+	is:'fc-drag-header-menu',
+	behaviors: [
+    FCBehaviors.DraggableBehavior,
+		Polymer.IronResizableBehavior,
+		Polymer.IronMenubarBehavior],
+	properties: {
+          	class: {
+                type: String,
+                value: function(){
+                    return 'horizontal layout';
+                }, 
+                notify: true,
+            
+               },
+            notRouter:{
+              type: Boolean,
+                value: function(){
+                return true;
+                  },
+              notify: true
+                },
+            dragmenu:{
+                type: Boolean,
+                value: false,
+                notify: true
+               },
+            staticmenu:{
+                type: Boolean,
+                computed:'_computestaticmenu(dragmenu)',
+                notify: true
+               },
+            currentWidth:{
+                  type: String, 
+                  value: function(){
+                            return "1250";
+                      },
+                  notify: true, 
+              },
+                _leftHidden: {
+                  type: Boolean,
+                  value: false
+                },
+                _rightHidden: {
+                  type: Boolean,
+                  value: false
+                },
+             
+              listeners: {
+                'iron-resize': '_onResize',
+              },
+             
+              keyBindings: {
+                'left': '_onLeftKey',
+                'right': '_onRightKey'
+              } 
+          },
+           hostAttributes: {
+                "role": 'tabList'
+              },
+            hostAttributes: {
+                'role': 'menubar'
+              },
+    
+    created: function() {
+      this._holdJob = null;
+    },
+    ready: function() {
+      this.setScrollDirection('x', this.$.tabsContainer);
+    },
+    attached: function(){
+    
+    },
+    swapMenu: function(){
+          this.notRouter = !this.notRouter;
+          },
+  _computestaticmenu: function(dragmenu){
+        return dragmenu;
+    },
+  _onResize: function() {
+      this.debounce('_onResize', function() {
+        this._scroll();
+        this._tabChanged(this.selectedItem);
+      }, 10);
+    },
+   
+  _toggleRightDrawer: function(){
+			// var drawer = document.querySelector('#drawer-2');	
+			// if(drawer.forceNarrow!==true)
+			// {drawer.forceNarrow = true;}
+			// else{drawer.forceNarrow = false;
+			// }
+	},
+	_toggleLeftDrawer: function(){
+		// var drawer = document.querySelector('#drawerPrimed');
+  //         var dashboard = document.querySelector("#dashboardPrime");	
+		// if(drawer.forceNarrow!==true)
+  //         {
+  //              drawer.forceNarrow = true;
+  //              drawer.responsiveWidth='90000px';
+  //              dashboard.leftHidden=true;
+  //         }
+  //         else
+  //         {
+  //              drawer.forceNarrow = false;
+  //              drawer.responsiveWidth ='1080px';
+  //              dashboard.leftHidden=false;
+  //         }
+     },
+     _resetWidth: function(e){
+          var self=this;
+          e.preventDefault();
+              switch(e.detail.state) {
+                case 'start':
+                  console.log(e.detail);
+                  break;
+                case 'track':
+                  var nwidth = parseInt(this.currentWidth) + e.detail.ddx;
+                  var trueWidth = (nwidth<250)?"250px":nwidth.toString()+'px';
+                  this.currentWidth=trueWidth;
+                  this.$.protoMenu.style.width= trueWidth;
+                  var insertionPoint = Polymer.dom(this.root).querySelector('CONTENT');
+                  var distributed = Polymer.dom(insertionPoint).getDistributedNodes();
+                  distributed[1].style.width= (nwidth<250)?"0px":(nwidth-250).toString()+'px';
+                
+                  break;
+                case 'end':
+               
+                  break;
+          }
+        },
+       
+});
+  </script>
+</dom-module>

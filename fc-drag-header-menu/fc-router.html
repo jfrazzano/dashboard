@@ -1,0 +1,173 @@
+
+
+<dom-module id="fc-router">
+<style>
+:host {position:static;
+      min-width: 145px;
+      overflow-x: scroll;
+     }
+  .longest{display: flex; flex: row; width: 84px; height: 42px; border: 1px solid #aedefe;} 
+   .link{   
+    color: white;
+    font-family: 'Merriweather', 'Times', sans-serif;
+    font-size: 16px;
+    font-weight: 600;}
+   .turnedon{ font-size: 18px; color: green; background: white;}
+</style>
+<template>
+     <paper-tab link selected-class="turnedon" class= "menubuttons longest">
+          <a
+               data-route="divisions" 
+               href="/" 
+               class="link horizontal layout center center-justified menuItem-dark">
+             Divisions 6
+          </a>
+      
+     </paper-tab>
+     <paper-tab link selected-class="turnedon" class="menubuttons longest">
+               <a
+                    data-route='dashboard' 
+                    class="link horizontal layout center center-justified" 
+                    href='/dashboard'>
+              Dashboard
+               </a>
+     </paper-tab>
+     <paper-tab link selected-class="turnedon" class="menubuttons longest">
+
+               <a
+                    data-route='divisionsThree' 
+                    class="link horizontal layout center center-justified menuItem-dark" 
+                    href='/divisionsThree'>
+                   Divisions Three
+               </a>
+       
+     </paper-tab>
+     <paper-tab link selected-class="turnedon" class="menubuttons longest">
+       
+               <a
+                    data-route='writing' 
+                    class="link horizontal layout center center-justified menuItem-dark" 
+                    href='/writing'>
+                    Writing
+               </a>
+          
+     </paper-tab>
+     <paper-tab 
+          link 
+          hidden$="[[!user]]"
+          selected-class="turnedon" class="menubuttons longest">
+               <a 
+                    data-route='results' 
+                    class="link horizontal layout center center-justified menuItem-dark" 
+                    href='/results'>
+              Results
+               </a>
+      </paper-tab>
+     <paper-tab 
+          link
+           selected-class="turnedon" class="menubuttons longest">
+
+               <a 
+                    data-route='testarea1' 
+                    class="link horizontal layout center center-justified menuItem-dark" 
+                    href='/testarea1'>
+                    Test 1
+               </a>
+     </paper-tab>
+     <paper-tab link selected-class="turnedon" class="menubuttons longest">
+          
+               <a   
+                    data-route='testarea2' 
+                    class="link horizontal layout center center-justified menuItem-dark" 
+                    href='/testarea2'>
+                    Test 2
+               </a>
+          
+     </paper-tab>       
+</template>
+<script>
+FcRouter = Polymer({
+	is:'fc-router',
+	behaviors: [
+		Polymer.IronResizableBehavior,
+		Polymer.NeonAnimationBehavior,
+		Polymer.IronSelectableBehavior,
+		Polymer.NeonAnimationRunnerBehavior,
+		Polymer.IronMenubarBehavior,
+		Polymer.IronRangeBehavior],
+	properties: {
+          	class: {
+                type: String,
+                value: function(){
+                    return 'horizontal layout'
+                }, 
+                notify: true,
+                reflectToAttribute: true
+               },
+              
+              
+                _leftHidden: {
+                  type: Boolean,
+                  value: false
+                },
+                _rightHidden: {
+                  type: Boolean,
+                  value: false
+                },
+                
+              hostAttributes: {
+                role: 'tabList'
+              },
+              listeners: {
+                'iron-resize': '_onResize',
+                'iron-select': '_onIronSelect',
+                'iron-deselect': '_onIronDeselect'
+              },
+              hostAttributes: {
+                'role': 'menubar'
+              },
+              keyBindings: {
+                'left': '_onLeftKey',
+                'right': '_onRightKey'
+              }, 
+              route: {}
+          },
+    _menuLaunch: function(){
+      this.pressed=!this.pressed;
+    },
+    created: function() {
+      this._holdJob = null;
+    },
+    ready: function() {
+      this.setScrollDirection('y', this.$.tabsContainer);
+    },
+    attached: function(){
+    },
+  
+    	_toggleRightDrawer: function(){
+			var drawer = document.querySelector('#drawer-2');	
+			if(drawer.forceNarrow!==true)
+			{drawer.forceNarrow = true;}
+			else{drawer.forceNarrow = false;
+			}
+	},
+	_toggleLeftDrawer: function(){
+		var drawer = document.querySelector('#drawerPrimed');
+          var dashboard = document.querySelector("#dashboardPrime");  
+    if(drawer.forceNarrow!==true)
+          {
+               drawer.forceNarrow = true;
+               drawer.responsiveWidth='90000px';
+               dashboard.leftHidden=true;
+          }
+          else
+          {
+               drawer.forceNarrow = false;
+               drawer.responsiveWidth ='1080px';
+               dashboard.leftHidden=false;
+          }
+     },
+});
+  </script>
+</dom-module>
+Contact GitHub API Training Shop Blog About

@@ -1,0 +1,149 @@
+<dom-module id="fc-value-holder-two">
+<template>
+<style>
+.inviso{width:1px; height:2px; visibility: hidden;}
+.hidden {
+	display:none!important;
+}
+</style>
+<div id="hanger">
+</div>
+
+<content>
+</content>
+<div id="hangerLow">
+
+</div>
+</template>
+
+<script>
+Polymer({
+	is:"fc-value-holder-two",
+	listeners: { "objectStoresUpdated": "handleObjectStoreChange"},
+	properties: {
+		isFirepad: {
+				type: Boolean,
+				reflectToAttribute: true,
+				notify: true
+			}, 
+		divId: {
+			type: String,
+			reflectToAttribute: true,
+			notify: true
+		},
+		index:{
+			type:Number,
+			notify: true,
+		},
+		objPropertyName:{
+			type: String,
+			value: function(){return "";},
+			notify: true,
+		},
+		dataContainerObjectArray:{
+			type:Array,
+			value:function(){return [];},
+			notify: true
+		},
+		datumObject:{
+			type: Object,
+			value:function(){return {};},
+			computed: "computeDataObject(dataObject, objPropertyName)",
+			notify:true,
+		},
+		dataObjectArray:{
+			type: Array,
+			value: function(){return[];},
+			notify: true,
+		},
+		dataObject:{
+			type:Object,
+			value:function(){return {};},
+			notify: true,
+			// 
+			//"name": null,"id": null, "class":null, "nodeName":null,"thisConstructor":null, "config":undefined, "handler": undefined,"registrants":undefined};
+		},
+		tabClicked:{
+			type: String,
+			value: function(){return ""},
+			observer:"observeTabClicked",
+		},
+		profileArrays:{
+			type: Array,
+			value: function(){return[];},
+			notify: true,
+		},
+		
+		elemsArray:{
+			type:Array,
+			value:function(){return [];},
+			notify: true
+		},
+		returnDataObject:{
+			type: Object,
+			notify: true,
+			value: function(){return {};},
+		},
+		objectsToInstantiate:{
+			type: Number,
+			value:function(){
+				return 0;
+			},
+			notify: true,
+		},
+	},		
+	ready: function(){
+	//console.log(this.dataObject, this.divId,"there were lots of empty instances here with no dom show of btns");
+	},
+	getArraysAb(){
+		var papa=document.querySelector("FC-DASHBOARD-DIVISIONS"),
+		key="FC-CALL-CENTER-DIALOG",
+		elem=papa.elemMap.get(key);
+		var inputArrays=elem.inputArraysAb;
+		this.set("profileArrays",inputArrays);
+		if(this.profileArrays && this.profileArrays.length>0){
+			var children=Polymer.dom(this.$.hanger).children;
+			children.forEach(function(val, item, array){
+				val.itemsArraysOne=this.profileArrays;
+			}, this);
+		}
+	},
+	handleObjectStoreChange(e){
+			console.log(e,e,e,e,e,e,e,e,e,e,e,e,e);
+				this.set("returnDataObject",e);
+	},
+	computeDataObject(ob, name){
+		console.log(ob, name);
+		var map=new Map();
+		var array=["#fff","#009","orange","#005c00","purple","white", "aqua", "aliceblue", "yellow"];
+		var fmap=ob.map(function(obb,i,arr){
+			var elem = new obb[name].constructor();
+			elem.background=array[i];
+						this.objectsToInstantiate++;
+						if(i!==0){Polymer.dom(elem).classList.add("hidden");}
+						var key=obb[name].nodeName+"_"+i;
+						
+						map.set(key, elem);
+						Polymer.dom(this.$.hanger).appendChild(elem);
+						return map.get(key);
+		}, this);
+			this.async(this.getArraysAb,550);
+			// Polymer.dom(this).classList.add(this.dataObject.class);
+			// var valueElement=new this.dataObject.constructor(this.dataObject.config);
+	},
+	observeTabClicked(newval, oldval){
+		if(newval){		
+			console.log(newval);
+		var children=Polymer.dom(this.$.hanger).children;
+		console.log(children);
+		children.forEach(function(child, i, arr){
+			if(newval==0 && i==0){Polymer.dom(child).classList.remove("hidden");}
+			else if(i!==newval && Polymer.dom(child).classList.contains("hidden")===false){Polymer.dom(child).classList.add("hidden")}
+			else if(i===newval){Polymer.dom(child).classList.remove("hidden"); console.log(child);}
+		},this);
+		}
+		
+	},
+});
+</script>
+</dom-module>
